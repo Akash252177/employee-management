@@ -1,0 +1,1044 @@
+/* Employees.css - Featuring minimal, modern UI */
+
+/* Main container styling */
+.staff-page-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f7f9fc;
+  color: #1f2937;
+}
+
+/* Removed fadeIn animation for better performance */
+
+.staff-content-wrapper {
+  width: 100%;
+}
+
+/* Breadcrumb styling */
+.staff-page-breadcrumb {
+  margin-bottom: 24px;
+  color: #6b7280;
+}
+
+.staff-page-breadcrumb .ant-breadcrumb {
+  font-size: 14px;
+}
+
+.staff-page-breadcrumb .ant-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.staff-page-breadcrumb .anticon {
+  margin-right: 5px;
+  font-size: 14px;
+}
+
+/* Header styling */
+.staff-header {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+/* Removed slideDown animation for better performance */
+
+.staff-title-area {
+  flex: 1;
+  min-width: 280px;
+}
+
+.staff-icon-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.staff-header-icon {
+  font-size: 24px;
+  color: #1890ff;
+  margin-right: 12px;
+}
+
+.staff-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.staff-description {
+  color: #6b7280;
+  font-size: 15px;
+  margin-bottom: 0;
+  max-width: 500px;
+}
+
+.staff-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.staff-stat-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  padding: 16px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  border: 1px solid #eef1f4;
+}
+
+.staff-stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.staff-stat-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* Action bar */
+.staff-action-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  flex-wrap: wrap;
+  gap: 16px;
+  background-color: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Removed slideUp animation for better performance */
+
+.staff-view-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.staff-view-toggle {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.staff-theme-button {
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.staff-action-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.staff-search-input {
+  width: 250px;
+  border-radius: 6px;
+}
+
+.staff-filter-button,
+.staff-export-button,
+.staff-add-button {
+  border-radius: 6px;
+  height: 36px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.staff-add-button {
+  background-color: #1890ff;
+}
+
+.staff-add-button:hover {
+  background-color: #40a9ff;
+}
+
+.staff-export-button {
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  outline: none !important;
+}
+
+.staff-export-button:focus,
+.staff-export-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Loading state */
+.staff-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.staff-loading-container p {
+  margin-top: 16px;
+  color: #6b7280;
+}
+
+/* Empty state */
+.staff-empty-state {
+  background-color: white;
+  padding: 48px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Error state */
+.staff-error-container {
+  background-color: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.staff-error-text {
+  color: #f5222d;
+  margin-bottom: 16px;
+}
+
+/* Content area */
+.staff-content {
+  margin-bottom: 24px;
+}
+
+/* Grid View */
+.staff-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.staff-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid #eef1f4;
+}
+
+.staff-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.staff-card-selected {
+  border: 2px solid #1890ff;
+}
+
+.staff-card-header {
+  padding: 20px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  background-color: #f7f9fc;
+  border-bottom: 1px solid #eef1f4;
+}
+
+.staff-avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.staff-avatar {
+  margin-bottom: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 3px solid white;
+}
+
+.staff-name {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.staff-role-tag {
+  font-size: 12px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.staff-role-tag::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.staff-card:hover .staff-role-tag::before,
+.staff-list-item:hover .staff-role-tag::before {
+  transform: translateX(100%);
+}
+
+.staff-card:hover .staff-role-tag,
+.staff-list-item:hover .staff-role-tag {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Role status indicator for Unassigned */
+.ant-tag:contains("Unassigned") {
+  opacity: 0.8;
+  background-color: #f5f5f5 !important;
+}
+
+/* Special styling for executive roles */
+.ant-tag[color="#cf1322"],
+.ant-tag[color="#d4380d"] {
+  font-weight: 600;
+}
+
+/* List view role column enhancements */
+.staff-col-role {
+  flex: 2.5;
+  min-width: 200px;
+  text-align: center;
+}
+
+.staff-col-role .ant-tag {
+  transition: all 0.2s ease;
+  font-weight: 500;
+  border-radius: 12px;
+  padding: 2px 10px;
+  border: none;
+  text-transform: capitalize;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+/* Fix for truncated role names */
+.ant-tag {
+  max-width: 100%;
+  overflow: visible;
+  white-space: normal;
+  height: auto;
+  line-height: 1.4;
+  padding: 4px 12px;
+}
+
+.staff-list-item:hover .staff-col-role .ant-tag {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.staff-dropdown {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.staff-actions-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.staff-actions-button.active,
+.staff-actions-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #1f2937;
+}
+
+.staff-dropdown-menu {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 160px;
+  z-index: 10;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.staff-dropdown-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.staff-dropdown-item:hover {
+  background-color: #f5f7fa;
+}
+
+.staff-dropdown-danger {
+  color: #f5222d;
+}
+
+.staff-dropdown-danger:hover {
+  background-color: #fff1f0;
+}
+
+.staff-card-content {
+  padding: 20px;
+}
+
+.staff-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.staff-detail-item {
+  display: flex;
+  align-items: center;
+}
+
+.staff-detail-label {
+  color: #6b7280;
+  margin-right: 12px;
+  width: 24px;
+  text-align: center;
+}
+
+.staff-detail-value {
+  color: #1f2937;
+  flex: 1;
+  word-break: break-word;
+}
+
+.staff-email {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.staff-email:hover {
+  text-decoration: underline;
+}
+
+.staff-card-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #eef1f4;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.staff-view-details-button {
+  font-size: 14px;
+  font-weight: 400;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+}
+
+.staff-view-details-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+  background-color: #40a9ff;
+}
+
+.staff-view-details-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+}
+
+.staff-view-details-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.staff-view-details-button:hover::before {
+  transform: translateX(100%);
+}
+
+/* List View */
+.staff-list-view {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid #eef1f4;
+  transition: all 0.3s ease;
+}
+
+.staff-list-header {
+  display: flex;
+  background-color: #f7f9fc;
+  padding: 14px 16px;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 1px solid #eef1f4;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+}
+
+.staff-list-item {
+  display: flex;
+  padding: 16px;
+  border-bottom: 1px solid #eef1f4;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.staff-list-item:last-child {
+  border-bottom: none;
+}
+
+.staff-list-item:hover {
+  background-color: #f5f7fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.staff-list-item-selected {
+  background-color: #e6f7ff;
+  border-left: 3px solid #1890ff;
+  padding-left: 13px;
+}
+
+.staff-list-header-col,
+.staff-list-col {
+  padding: 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.staff-col-employee {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 3;
+  min-width: 200px;
+}
+
+.staff-list-avatar {
+  flex-shrink: 0;
+  border: 2px solid white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.staff-list-item:hover .staff-list-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.staff-list-name {
+  font-weight: 500;
+  color: #1f2937;
+  transition: color 0.2s ease;
+}
+
+.staff-list-item:hover .staff-list-name {
+  color: #1890ff;
+}
+
+.staff-col-id {
+  flex: 1;
+  min-width: 80px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.staff-col-email {
+  flex: 2.5;
+  min-width: 180px;
+}
+
+.staff-email-link {
+  color: #1890ff;
+  text-decoration: none;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.staff-email-link:hover {
+  text-decoration: none;
+  color: #0c6dd3;
+}
+
+.staff-email-link:after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #0c6dd3;
+  transition: width 0.3s ease;
+}
+
+.staff-email-link:hover:after {
+  width: 100%;
+}
+
+.staff-col-phone {
+  flex: 1.5;
+  min-width: 120px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.staff-col-joined {
+  flex: 1.2;
+  min-width: 100px;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.staff-col-actions {
+  flex: 1;
+  min-width: 130px;
+  display: flex;
+  justify-content: flex-end;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.staff-list-item:hover .staff-col-actions {
+  opacity: 1;
+}
+
+.staff-action-icons {
+  display: flex;
+  gap: 6px;
+  background-color: rgba(240, 240, 240, 0.5);
+  border-radius: 8px;
+  padding: 2px 4px;
+  transition: all 0.2s ease;
+}
+
+.staff-list-item:hover .staff-action-icons {
+  background-color: rgba(240, 240, 240, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.staff-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.3s;
+  color: #6b7280;
+  position: relative;
+  overflow: hidden;
+}
+
+.staff-action-icon:hover {
+  background-color: #1890ff;
+  color: white;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.4);
+  transform: translateY(-3px) scale(1.05);
+}
+
+.staff-action-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.staff-action-icon:hover::before {
+  transform: translateX(100%);
+}
+
+.staff-delete-icon:hover {
+  background-color: #fff1f0;
+  color: #f5222d;
+}
+
+/* Dark theme list view adaptations */
+.dark-theme .staff-list-header {
+  background-color: #1a2233; 
+  border-color: #2d3748;
+}
+
+.dark-theme .staff-list-item {
+  border-color: #2d3748;
+}
+
+.dark-theme .staff-list-item:hover {
+  background-color: #1f2937;
+}
+
+.dark-theme .staff-action-icons {
+  background-color: rgba(45, 55, 72, 0.7);
+}
+
+.dark-theme .staff-list-item:hover .staff-action-icons {
+  background-color: rgba(45, 55, 72, 0.95);
+}
+
+.dark-theme .staff-action-icon:hover {
+  background-color: #2d3748;
+}
+
+.dark-theme .staff-col-id,
+.dark-theme .staff-col-phone,
+.dark-theme .staff-col-joined {
+  color: #9ca3af;
+}
+
+.dark-theme .staff-list-item:hover .staff-list-name {
+  color: #3b82f6;
+}
+
+/* Glass theme list view adaptations */
+.glass-theme .staff-list-header {
+  background-color: rgba(245, 247, 250, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.glass-theme .staff-list-item:hover {
+  background-color: rgba(245, 247, 250, 0.7);
+  backdrop-filter: blur(5px);
+}
+
+.glass-theme .staff-action-icons {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-theme .staff-list-item:hover .staff-action-icons {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Footer */
+.staff-footer {
+  margin-top: 24px;
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.staff-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Animations */
+.success-message-animation {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.error-message-animation {
+  animation: error-shake 0.5s ease-out;
+}
+
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Dark Theme */
+.dark-theme .staff-page-wrapper {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.dark-theme .staff-header,
+.dark-theme .staff-action-bar,
+.dark-theme .staff-card,
+.dark-theme .staff-list-view,
+.dark-theme .staff-footer,
+.dark-theme .staff-loading-container,
+.dark-theme .staff-empty-state,
+.dark-theme .staff-error-container {
+  background-color: #111827;
+  border-color: #374151;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .staff-title,
+.dark-theme .staff-name,
+.dark-theme .staff-stat-value,
+.dark-theme .staff-detail-value,
+.dark-theme .staff-list-name {
+  color: #f3f4f6;
+}
+
+.dark-theme .staff-description,
+.dark-theme .staff-stat-label,
+.dark-theme .staff-detail-label,
+.dark-theme .staff-footer-content {
+  color: #9ca3af;
+}
+
+.dark-theme .staff-stat-item,
+.dark-theme .staff-card-header,
+.dark-theme .staff-list-header {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark-theme .staff-dropdown-menu,
+.dark-theme .staff-dropdown-item {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.dark-theme .staff-dropdown-item:hover {
+  background-color: #374151;
+}
+
+.dark-theme .staff-list-item:hover {
+  background-color: #1f2937;
+}
+
+.dark-theme .staff-list-item-selected {
+  background-color: #1a365d;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .staff-page-wrapper {
+    padding: 16px;
+  }
+  
+  .staff-header {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .staff-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .staff-action-right {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .staff-search-input {
+    width: 100%;
+  }
+
+  .staff-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .staff-stat-item {
+    min-width: 45%;
+    margin-bottom: 12px;
+  }
+  
+  .staff-list-view {
+    overflow-x: auto;
+  }
+  
+  .staff-list-item,
+  .staff-list-header {
+    min-width: 800px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .staff-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Glass Theme */
+.glass-theme .staff-page-wrapper {
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.glass-theme .staff-header,
+.glass-theme .staff-action-bar,
+.glass-theme .staff-card,
+.glass-theme .staff-list-view,
+.glass-theme .staff-footer,
+.glass-theme .staff-loading-container,
+.glass-theme .staff-empty-state,
+.glass-theme .staff-error-container {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.glass-theme .staff-card-header,
+.glass-theme .staff-list-header,
+.glass-theme .staff-stat-item {
+  background-color: rgba(245, 247, 250, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-theme .staff-list-item:hover {
+  background-color: rgba(245, 247, 250, 0.5);
+}
+
+.glass-theme .staff-list-item-selected {
+  background-color: rgba(230, 247, 255, 0.5);
+}
+
+.glass-theme .staff-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* Remove all outlines from buttons and form controls */
+.staff-page-wrapper button,
+.staff-page-wrapper .ant-btn,
+.staff-page-wrapper input,
+.staff-page-wrapper .ant-input,
+.staff-page-wrapper .ant-input-affix-wrapper,
+.staff-action-bar button,
+.staff-export-button,
+.staff-add-button,
+.staff-filter-button,
+.staff-theme-button,
+.staff-action-icon,
+.staff-view-details-button {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove outlines on focus and focus-visible states */
+.staff-page-wrapper button:focus,
+.staff-page-wrapper .ant-btn:focus,
+.staff-page-wrapper input:focus,
+.staff-page-wrapper .ant-input:focus,
+.staff-page-wrapper .ant-input-affix-wrapper:focus,
+.staff-action-bar button:focus,
+.staff-export-button:focus,
+.staff-add-button:focus,
+.staff-filter-button:focus,
+.staff-theme-button:focus,
+.staff-action-icon:focus,
+.staff-view-details-button:focus,
+.staff-page-wrapper button:focus-visible,
+.staff-page-wrapper .ant-btn:focus-visible,
+.staff-page-wrapper input:focus-visible,
+.staff-page-wrapper .ant-input:focus-visible,
+.staff-page-wrapper .ant-input-affix-wrapper:focus-visible,
+.staff-action-bar button:focus-visible,
+.staff-export-button:focus-visible,
+.staff-add-button:focus-visible,
+.staff-filter-button:focus-visible,
+.staff-theme-button:focus-visible,
+.staff-action-icon:focus-visible,
+.staff-view-details-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}

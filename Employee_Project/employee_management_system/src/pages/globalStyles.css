@@ -1,0 +1,77 @@
+/* Global Input Field Styling */
+.ant-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .ant-input:focus {
+    border-color: #007bff;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+
+  /* Style overrides for Ant Design Input */
+.custom-input {
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+    border: 1px solid #ccc !important;
+    font-size: 14px !important;
+    transition: border-color 0.3s !important;
+  }
+  
+  .custom-input:focus,
+  .custom-input-focused {
+    border-color: #007bff !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+/* Hide all message notifications globally */
+.ant-message,
+.ant-message-notice,
+.ant-message-notice-content {
+  display: none !important;
+}
+
+/* Remove all outlines globally */
+*:focus, 
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove outlines from all form elements */
+input, 
+textarea, 
+select, 
+button,
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker,
+.ant-btn {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input:focus, 
+textarea:focus, 
+select:focus, 
+button:focus,
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-select-selector:focus,
+.ant-picker:focus,
+.ant-btn:focus,
+.ant-input-focused,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  outline: none !important;
+  box-shadow: none !important;
+}

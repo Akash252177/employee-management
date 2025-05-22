@@ -1,0 +1,775 @@
+/* AddEmployee.css */
+
+/* Global rules to remove all outlines and focus rings */
+* {
+  outline: none !important;
+}
+
+*:focus, 
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ant-input, 
+.ant-input-affix-wrapper, 
+.ant-select-selector, 
+.ant-picker, 
+.ant-btn {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ant-input:focus, 
+.ant-input-affix-wrapper:focus, 
+.ant-select-selector:focus, 
+.ant-picker:focus, 
+.ant-btn:focus,
+.ant-input-focused, 
+.ant-input-affix-wrapper-focused, 
+.ant-select-focused .ant-select-selector, 
+.ant-picker-focused {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.add-employee-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.employee-form-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: cardEntrance 1s ease;
+}
+
+@keyframes cardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Sections */
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Direct header styling without card */
+.direct-header {
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+  border-left: 4px solid #1890ff;
+}
+
+/* Welcome Header Design */
+.welcome-header, 
+.welcome-text, 
+.greeting, 
+.instruction {
+  display: none;
+}
+
+.form-header h2 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #1890ff;
+}
+
+.form-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  transform-origin: top center;
+}
+
+.form-section-title {
+  color: #1890ff;
+  margin-bottom: 1.2rem;
+  position: relative;
+  padding-left: 12px;
+}
+
+.form-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: #1890ff;
+  border-radius: 2px;
+}
+
+/* Input Animation */
+.input-animate {
+  transition: all 0.3s ease;
+}
+
+.input-animate:hover,
+.input-animate:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+/* Upload Container */
+.profile-upload-container {
+  transition: all 0.3s ease;
+}
+
+.profile-upload-animate:hover {
+  transform: scale(1.05);
+}
+
+/* Form Action Buttons */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+.submit-btn,
+.cancel-btn {
+  min-width: 120px;
+  height: 40px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.button-animate {
+  position: relative;
+  overflow: hidden;
+}
+
+.button-animate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button-animate:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0) 100%
+  );
+  transition: all 0.6s;
+}
+
+.button-animate:hover:before {
+  left: 100%;
+}
+
+.submit-btn {
+  background: #1890ff;
+}
+
+.submit-btn:hover {
+  background: #40a9ff;
+}
+
+.cancel-btn:hover {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+/* Spouse field animation */
+.spouse-field {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+
+.spouse-field.fade-in {
+  max-height: 100px;
+  opacity: 1;
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+.slide-in-down {
+  animation: slideInDown 0.6s ease both;
+}
+
+.pulse {
+  animation: pulse 0.5s ease;
+}
+
+.shake {
+  animation: shake 0.5s ease;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-5px);
+  }
+  40%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .form-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .submit-btn, .cancel-btn {
+    width: 100%;
+  }
+}
+
+/* New styles from EmployeeRole.jsx */
+
+/* Breadcrumb styling */
+.page-breadcrumb {
+  margin-bottom: 16px;
+  padding: 10px 0;
+}
+
+/* Header styling */
+.employee-status-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.header-icon {
+  font-size: 24px;
+  color: #1890ff;
+  margin-right: 12px;
+}
+
+.header-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Custom form label with icon */
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-label .anticon {
+  color: #1890ff;
+}
+
+/* Custom input styling */
+.custom-input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.custom-input:hover {
+  border-color: #40a9ff;
+  box-shadow: none !important;
+}
+
+.custom-input:focus {
+  border-color: #1890ff;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.disabled-input {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* Custom select styling */
+.custom-select {
+  width: 100%;
+}
+
+.custom-select .ant-select-selector {
+  border-radius: 8px !important;
+  padding: 4px 12px !important;
+  height: 40px !important;
+  transition: all 0.3s ease;
+}
+
+.custom-select:not(.ant-select-disabled):hover .ant-select-selector {
+  border-color: #40a9ff !important;
+  box-shadow: none !important;
+}
+
+.custom-select.ant-select-focused .ant-select-selector {
+  border-color: #1890ff !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.select-icon {
+  color: #1890ff;
+  font-size: 12px;
+}
+
+/* Custom DatePicker styling */
+.custom-datepicker {
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.custom-datepicker-popup {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0 !important;
+  border: 1px solid #e8e8e8 !important;
+  width: 280px !important;
+  overflow: hidden;
+}
+
+.custom-datepicker-popup .ant-picker-panel {
+  border-radius: 0;
+  overflow: hidden;
+  background: #fff;
+  width: 100%;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-panel-container {
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none !important;
+  background-color: white;
+  width: 100%;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-panel-focused {
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-panels {
+  border-right: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 8px;
+  background-color: white;
+  border-right: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-header-view {
+  font-weight: 500;
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.custom-datepicker-popup .ant-picker-header button {
+  color: #1890ff;
+  transition: all 0.2s;
+  padding: 0 5px;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-header button:hover {
+  color: #40a9ff;
+  background: none;
+}
+
+.custom-datepicker-popup .ant-picker-content {
+  width: 100%;
+  padding: 0 2px;
+  border-right: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-content table {
+  border-collapse: collapse;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-content th {
+  color: rgba(0, 0, 0, 0.65);
+  font-weight: normal;
+  font-size: 12px;
+  height: 28px;
+  padding: 0;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-content td {
+  height: 28px;
+  padding: 2px 0;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-cell {
+  transition: none;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-cell-in-view {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.custom-datepicker-popup .ant-picker-cell-inner {
+  height: 22px;
+  width: 22px;
+  line-height: 22px;
+  font-size: 13px;
+  margin: 0 auto;
+  border: none !important;
+}
+
+.custom-datepicker-popup .ant-picker-cell:hover .ant-picker-cell-inner {
+  background: rgba(24, 144, 255, 0.1) !important;
+}
+
+.custom-datepicker-popup .ant-picker-cell-selected .ant-picker-cell-inner {
+  background: #1890ff !important;
+  border-radius: 2px !important;
+  color: white !important;
+  font-weight: normal;
+}
+
+.custom-datepicker-popup .ant-picker-today-btn {
+  color: #1890ff;
+  font-weight: normal;
+  font-size: 13px;
+}
+
+.custom-datepicker-popup .ant-picker-today-btn:hover {
+  color: #40a9ff;
+}
+
+.custom-datepicker-popup .ant-picker-footer {
+  border-top: 1px solid #f0f0f0;
+  padding: 8px;
+  text-align: center;
+  border-right: none !important;
+}
+
+.date-picker.custom-input .ant-picker-suffix {
+  color: #1890ff;
+}
+
+.date-picker.custom-input {
+  padding: 4px 11px;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+  height: 40px;
+}
+
+.date-picker.custom-input:hover {
+  border-color: #40a9ff;
+  box-shadow: none !important;
+}
+
+.date-picker.custom-input.ant-picker-focused,
+.date-picker.custom-input:focus {
+  border-color: #1890ff;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Specific fix for the black border */
+.custom-datepicker-popup .ant-picker-date-panel,
+.custom-datepicker-popup .ant-picker-panel,
+.custom-datepicker-popup .ant-picker-panel-container,
+.custom-datepicker-popup .ant-picker-decade-panel, 
+.custom-datepicker-popup .ant-picker-year-panel,
+.custom-datepicker-popup .ant-picker-month-panel,
+.custom-datepicker-popup .ant-picker-week-panel {
+  border: none !important;
+}
+
+.custom-datepicker-popup *:not(input):not(textarea) {
+  border-right: none !important;
+}
+
+/* Button container */
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.save-button, .reset-button {
+  min-width: 120px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.save-button {
+  background: #1890ff;
+  color: #fff;
+  border: none;
+}
+
+.save-button:hover {
+  background: #40a9ff;
+  box-shadow: none !important;
+  transform: translateY(-2px);
+}
+
+.reset-button {
+  background: #fff;
+  color: rgba(0, 0, 0, 0.65);
+  border: 1px solid #d9d9d9;
+}
+
+.reset-button:hover {
+  color: #40a9ff;
+  border-color: #40a9ff;
+  box-shadow: none !important;
+  transform: translateY(-2px);
+}
+
+/* Loading icon animation */
+.loading-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s infinite linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Modern Header Design */
+.header-design {
+  position: relative;
+  max-width: 75%;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: none;
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.header-design:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #1890ff, #52c41a);
+}
+
+.header-design:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.header-content {
+  position: relative;
+  z-index: 2;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.header-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 6px 0;
+  letter-spacing: 0.3px;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  color: #666666;
+  margin: 0;
+  font-weight: 400;
+}
+
+.direct-header {
+  border-left: none;
+  padding-left: 0;
+}
+
+/* Enhanced rules to completely remove outlines from all form elements */
+.add-employee-page input,
+.add-employee-page textarea,
+.add-employee-page .ant-input,
+.add-employee-page .ant-input-affix-wrapper,
+.add-employee-page .ant-select-selector,
+.add-employee-page .ant-picker,
+.add-employee-page button,
+.add-employee-page .ant-btn,
+.custom-input,
+.custom-select .ant-select-selector,
+.date-picker {
+  border-color: #d9d9d9 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.add-employee-page input:focus,
+.add-employee-page textarea:focus,
+.add-employee-page .ant-input:focus,
+.add-employee-page .ant-input-affix-wrapper:focus,
+.add-employee-page .ant-select-selector:focus,
+.add-employee-page .ant-picker:focus,
+.add-employee-page .ant-input-affix-wrapper-focused,
+.add-employee-page .ant-select-focused .ant-select-selector,
+.add-employee-page .ant-picker-focused,
+.custom-input:focus,
+.custom-select.ant-select-focused .ant-select-selector,
+.date-picker.ant-picker-focused,
+.date-picker:focus {
+  border-color: #1890ff !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Override Ant's default hover styling */
+.add-employee-page input:hover,
+.add-employee-page textarea:hover,
+.add-employee-page .ant-input:hover,
+.add-employee-page .ant-input-affix-wrapper:hover,
+.add-employee-page .ant-select-selector:hover,
+.add-employee-page .ant-picker:hover,
+.custom-input:hover,
+.custom-select:hover .ant-select-selector,
+.date-picker:hover {
+  border-color: #40a9ff !important;
+  box-shadow: none !important;
+}
+
+/* Additional rules for focus-visible state and Ant Design's specific focus classes */
+.add-employee-page input:focus-visible,
+.add-employee-page textarea:focus-visible,
+.add-employee-page .ant-input:focus-visible,
+.add-employee-page .ant-input-affix-wrapper:focus-visible,
+.add-employee-page .ant-select-selector:focus-visible,
+.add-employee-page .ant-picker:focus-visible,
+.add-employee-page button:focus-visible,
+.add-employee-page .ant-btn:focus-visible,
+.custom-input:focus-visible,
+.custom-select .ant-select-selector:focus-visible,
+.date-picker:focus-visible,
+.ant-input-focused,
+.ant-picker-focused,
+.ant-select-focused .ant-select-selector,
+.ant-input-affix-wrapper-focused {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #1890ff !important;
+}
+
+/* Ensure Ant Design components don't get focus rings */
+*:focus {
+  outline: none !important;
+}
+
+/* Message animations moved to separate messageStyles.css file */

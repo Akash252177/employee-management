@@ -1,0 +1,1426 @@
+/* ProductReport.css - Custom styles for Product Report Dashboard */
+
+/* Main container styling */
+.product-report-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  animation: fadeIn 0.4s ease-out;
+  will-change: opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Animation keyframes */
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from { 
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-up {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+/* New animation classes for CSS-based animations */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.fade-out {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.slide-in-down {
+  animation: slideInDown 0.6s ease forwards;
+}
+
+.slide-in-up {
+  animation: slide-in-up 0.6s ease forwards;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.6s ease forwards;
+}
+
+.pulse-animation {
+  animation: pulse 0.6s ease;
+}
+
+.shake-animation {
+  animation: shake 0.5s ease;
+}
+
+.reset-highlight {
+  background-color: rgba(250, 173, 20, 0.1);
+  transition: background-color 0.5s ease;
+}
+
+.success-highlight {
+  box-shadow: 0 0 20px rgba(24, 144, 255, 0.3);
+  transition: box-shadow 1.5s ease;
+}
+
+.success-highlight-green {
+  box-shadow: 0 0 20px rgba(82, 196, 26, 0.3);
+  transition: box-shadow 1.5s ease;
+}
+
+.success-highlight-purple {
+  box-shadow: 0 0 20px rgba(114, 46, 209, 0.3);
+  transition: box-shadow 1.5s ease;
+}
+
+.pulse-button {
+  animation: pulse-scale 0.6s ease;
+}
+
+@keyframes pulse-scale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.collapse-search {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+
+.expand-search {
+  height: auto;
+  opacity: 1;
+  transition: height 0.4s ease, opacity 0.4s ease;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.row-appear {
+  animation: rowAppear 0.3s ease forwards;
+}
+
+@keyframes rowAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Breadcrumb styling */
+.product-report-page-breadcrumb {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  animation: slideInDown 0.5s ease;
+}
+
+.product-report-page-breadcrumb .ant-breadcrumb {
+  font-size: 14px;
+}
+
+.product-report-page-breadcrumb .ant-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.product-report-page-breadcrumb .anticon {
+  margin-right: 5px;
+  font-size: 15px;
+}
+
+/* Custom header styling */
+.product-report-status-header {
+  background: #e6f7ff;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: slideInDown 0.6s ease-out;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.product-report-status-header:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.product-report-header-icon {
+  font-size: 28px;
+  color: #1890ff;
+  margin-right: 16px;
+  animation: iconPulse 1s ease-out;
+}
+
+.product-report-header-text {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Success notification */
+.product-report-success-notification {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-left: 4px solid #52c41a;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  animation: success-slide-in 0.5s ease;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  position: relative;
+}
+
+.product-report-success-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  background-color: #52c41a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.product-report-success-icon {
+  color: white;
+  font-size: 14px;
+}
+
+/* Info banner styling */
+.product-report-info-banner {
+  background-color: #f0f7ff;
+  border: 1px solid #bae0ff;
+  border-left: 4px solid #1890ff;
+  border-radius: 8px;
+  padding: 18px 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.05);
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.product-report-info-banner:hover {
+  border-color: #91caff;
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.08);
+  transform: translateY(-3px);
+}
+
+.product-report-info-banner-icon {
+  font-size: 26px;
+  color: #1890ff;
+  margin-right: 18px;
+  transition: transform 0.3s ease;
+}
+
+.product-report-info-banner:hover .product-report-info-banner-icon {
+  transform: scale(1.1);
+}
+
+.product-report-info-banner-title {
+  font-size: 17px;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 6px;
+}
+
+.product-report-info-banner-description {
+  font-size: 14px;
+  color: #595959;
+  line-height: 1.5;
+}
+
+/* Card styling */
+.product-report-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  animation: slideInUp 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  padding: 24px 28px;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 28px;
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+  background-color: white;
+}
+
+.product-report-card:hover {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+}
+
+/* Results card styling */
+.product-report-results-card {
+  border-left: 4px solid #722ed1;
+  position: relative;
+}
+
+/* Results controls */
+.product-report-results-controls {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-report-refresh-button {
+  color: #1890ff;
+  transition: all 0.2s ease;
+}
+
+.product-report-refresh-button:hover {
+  background: rgba(24, 144, 255, 0.1);
+  transform: rotate(30deg);
+}
+
+/* Section styling */
+.product-report-role-info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  animation: fadeInLeft 0.5s ease-out;
+  position: relative;
+}
+
+.product-report-role-icon {
+  width: 38px;
+  height: 38px;
+  background-color: #f0f7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  transition: all 0.3s;
+}
+
+.product-report-role-icon .anticon {
+  color: #1890ff;
+  font-size: 20px;
+}
+
+.product-report-card:hover .product-report-role-icon {
+  background-color: #e6f7ff;
+  transform: translateY(-2px);
+}
+
+.product-report-role-info-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.product-report-toggle-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: #1890ff;
+  transition: all 0.2s ease;
+}
+
+.product-report-toggle-button:hover {
+  background: rgba(24, 144, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.product-report-search-intro {
+  background-color: #fafafa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #595959;
+  border-left: 3px solid #1890ff;
+}
+
+/* Form styling */
+.product-report-form-item {
+  margin-bottom: 24px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Form label styling */
+.product-report-form-label {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.product-report-form-label .anticon {
+  margin-right: 8px;
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.product-report-form-help-icon {
+  margin-left: 6px;
+  color: #8c8c8c;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.product-report-form-help-icon:hover {
+  color: #1890ff;
+  transform: scale(1.2);
+}
+
+/* Add underline animation on hover */
+.product-report-form-label:after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #1890ff;
+  transition: width 0.3s ease;
+}
+
+.product-report-form-item:hover .product-report-form-label:after {
+  width: 30px;
+}
+
+.product-report-form-item:hover .product-report-form-label {
+  color: #1890ff;
+}
+
+/* Form inputs styling */
+.product-report-custom-input {
+  height: 44px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  will-change: border-color, box-shadow;
+  transform: translateZ(0);
+}
+
+.product-report-custom-input:hover {
+  border-color: #40a9ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1) !important;
+}
+
+.product-report-custom-input:focus {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+  outline: 0;
+  transform: translateY(-1px);
+}
+
+/* Section divider */
+.product-report-section-divider {
+  margin: 32px 0;
+  border-top: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.product-report-section-divider:after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, #1890ff, #40a9ff);
+  border-radius: 2px;
+  animation: dividerGrow 1s ease-in-out forwards;
+}
+
+@keyframes dividerGrow {
+  from { width: 0; }
+  to { width: 80px; }
+}
+
+/* Technical section intro */
+.product-report-technical-section-intro {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  animation: fadeIn 0.6s ease-out 0.2s backwards;
+  transition: all 0.3s ease;
+  border-left: 3px solid #faad14;
+}
+
+.product-report-technical-section-intro:hover {
+  background-color: #fff8e6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+  
+.product-report-tech-intro-icon {
+  font-size: 22px;
+  color: #faad14;
+  margin-right: 14px;
+  transition: transform 0.3s ease;
+}
+
+.product-report-technical-section-intro:hover .product-report-tech-intro-icon {
+  transform: scale(1.15);
+}
+
+/* Button styling */
+.product-report-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+  gap: 16px;
+  animation: actionButtonsAppear 1s ease-out;
+}
+  
+.product-report-search-button,
+.product-report-reset-button {
+  height: 44px !important;
+  padding: 0 24px !important;
+  font-size: 15px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.product-report-search-button {
+  background: linear-gradient(135deg, #1890ff, #40a9ff) !important;
+  border: none !important;
+}
+
+.product-report-search-button:hover {
+  background: linear-gradient(135deg, #0c7ad8, #1890ff) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.25) !important;
+}
+
+.product-report-reset-button {
+  background: white !important;
+  color: rgba(0, 0, 0, 0.65) !important;
+  border: 1px solid #d9d9d9 !important;
+}
+
+.product-report-reset-button:hover, 
+.product-report-reset-button:focus {
+  color: #40a9ff !important;
+  border-color: #40a9ff !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.product-report-reset-button:active {
+  transform: translateY(-1px) !important;
+}
+
+/* Footer styling */
+.product-report-page-footer {
+  background: linear-gradient(90deg, #f5f5f5, #fafafa);
+  border-radius: 10px;
+  padding: 20px 28px;
+  margin-top: 32px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+  animation: fadeIn 0.6s ease-out 0.5s backwards;
+}
+
+.product-report-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.product-report-footer-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-report-footer-title {
+  color: #262626;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.product-report-footer-subtitle {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.product-report-footer-right {
+  display: flex;
+  gap: 8px;
+}
+
+.product-report-help-button {
+  color: #1890ff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+}
+
+.product-report-help-button:hover {
+  color: #40a9ff;
+  background-color: rgba(24, 144, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.product-report-dashboard-button {
+  padding: 4px 12px;
+  background: #1890ff;
+  color: white;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.product-report-dashboard-button:hover {
+  background: #40a9ff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.25);
+}
+
+.product-report-footer-note {
+  font-size: 13px;
+  color: #8c8c8c;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.product-report-footer-note .anticon {
+  color: #1890ff;
+  margin-right: 8px;
+}
+
+/* Loading icon */
+.product-report-loading-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+/* Table styling */
+.ant-table-wrapper {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ant-table-thead > tr > th {
+  background-color: #f0f7ff !important;
+  color: #1890ff !important;
+  font-weight: 600 !important;
+  padding: 16px 16px !important;
+  transition: all 0.3s ease;
+}
+
+.even-row {
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.odd-row {
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+}
+
+/* Add hover effect to table rows */
+.ant-table-tbody > tr {
+  transition: all 0.3s ease;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: #e6f7ff !important;
+  transform: translateZ(0);
+}
+
+.ant-table-tbody > tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 1;
+  position: relative;
+}
+
+/* Tabs styling */
+.product-report-tabs .ant-tabs-nav {
+  margin-bottom: 20px;
+}
+
+.product-report-tabs .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab {
+  border-radius: 8px 8px 0 0;
+  background-color: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  padding: 10px 16px;
+}
+
+.product-report-tabs .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active {
+  background-color: #fff;
+  border-bottom-color: #fff;
+  transform: translateY(-4px);
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.product-report-tabs .ant-tabs-tab .anticon {
+  margin-right: 8px;
+  transition: all 0.3s ease;
+}
+
+.product-report-tabs .ant-tabs-tab:hover {
+  color: #40a9ff;
+}
+
+.product-report-tabs .ant-tabs-tab:hover .anticon {
+  transform: scale(1.2);
+}
+
+/* Export options */
+.product-report-export-options {
+  margin-right: 8px;
+}
+
+/* Animation classes */
+.success-message-animation {
+  animation: slideInRight 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.error-message-animation {
+  animation: error-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Table elements styling */
+.product-report-table-badge {
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.product-report-table-badge:hover {
+  transform: translateY(-2px);
+}
+
+.product-report-table-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.product-report-table-tag .anticon {
+  margin-right: 5px;
+  font-size: 12px;
+}
+
+.product-report-table-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.product-report-table-date {
+  display: flex;
+  align-items: center;
+  color: #595959;
+}
+
+.product-report-table-date .anticon {
+  margin-right: 6px;
+  color: #1890ff;
+}
+
+/* Action buttons */
+.product-report-action-buttons {
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
+
+tr:hover .product-report-action-buttons {
+  opacity: 1;
+}
+
+.product-report-view-button, 
+.product-report-download-button {
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  height: auto;
+}
+
+.product-report-view-button {
+  background: #1890ff;
+  border-color: #1890ff;
+}
+
+.product-report-view-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.25);
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.product-report-download-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #1890ff;
+  border-color: #1890ff;
+}
+
+/* Drawer styling */
+.product-report-details-drawer .ant-drawer-header {
+  background-color: #f0f7ff;
+  border-bottom: 1px solid #e6f7ff;
+  padding: 16px 24px;
+}
+
+.product-report-drawer-title {
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.product-report-drawer-title .anticon {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #1890ff;
+}
+
+.product-report-details-drawer .ant-drawer-title {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.product-report-details-drawer .detail-content {
+  padding: 16px 0;
+}
+
+.product-report-details-drawer .ant-drawer-body {
+  padding: 24px;
+}
+
+.product-report-details-drawer .ant-card {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.product-report-details-drawer .ant-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+.product-report-details-drawer .ant-card-head {
+  background: linear-gradient(90deg, #f0f7ff, #f5f5f5);
+  border-bottom: none;
+  padding: 12px 16px;
+}
+
+.product-report-details-drawer .ant-card-head-title {
+  font-weight: 600;
+  color: #262626;
+}
+
+.product-report-details-drawer .ant-card-body {
+  padding: 16px 20px;
+}
+
+/* Detail cards */
+.product-report-detail-card {
+  transition: all 0.3s ease;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.product-report-detail-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+.product-report-detail-card .ant-card-head {
+  background: linear-gradient(90deg, #f0f7ff, #f5f5f5);
+  border-bottom: none;
+}
+
+.product-report-detail-card .ant-statistic-title {
+  font-size: 14px;
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.product-report-detail-card .ant-statistic-content {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Detail view alert */
+.detail-content .ant-alert {
+  border-radius: 10px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.detail-content .ant-alert:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+
+.detail-content .ant-alert-message {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.detail-content .ant-alert-description {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-report-container {
+    padding: 16px;
+  }
+  
+  .product-report-button-container {
+    flex-direction: column-reverse;
+  }
+  
+  .product-report-search-button, .product-report-reset-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .product-report-status-header {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .product-report-header-icon {
+    margin-bottom: 12px;
+  }
+  
+  .product-report-info-banner {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-report-info-banner-icon {
+    margin-bottom: 12px;
+  }
+
+  .product-report-info-banner-tips {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .product-report-technical-section-intro {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .product-report-tech-intro-icon {
+    margin-bottom: 8px;
+  }
+  
+  .product-report-footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+  .product-report-footer-right {
+    align-self: flex-start;
+  }
+}
+
+/* Performance optimizations */
+.report-container,
+.product-report-card,
+.product-report-role-info-header,
+.ant-table-wrapper,
+.ant-tabs,
+.product-report-form-label,
+.product-report-button-container {
+  transform: translateZ(0);
+}
+
+/* Optimize large table rendering */
+.ant-table-row {
+  contain: layout style;
+}
+
+/* Empty state styling */
+.product-report-empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0;
+  background-color: #fafafa;
+  border-radius: 10px;
+  margin: 10px 0;
+  transition: all 0.3s ease;
+}
+
+.product-report-empty-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.product-report-empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.product-report-empty-description {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin-bottom: 20px;
+  text-align: center;
+  max-width: 80%;
+}
+
+/* Tag styling */
+.ant-tag {
+  margin-right: 0;
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 2px 8px;
+  transition: all 0.3s ease;
+}
+
+.ant-tag:hover {
+  transform: scale(1.05);
+}
+
+/* PDF Export and Print Styling */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .product-report-container,
+  .product-report-container * {
+    visibility: visible;
+  }
+  
+  .product-report-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  .ant-btn, 
+  .product-report-export-options,
+  .product-report-refresh-button,
+  .ant-pagination {
+    display: none !important;
+  }
+  
+  .product-report-header {
+    background: #f0f7ff !important;
+    color: #001529 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  .product-report-card {
+    box-shadow: none !important;
+    border: 1px solid #e8e8e8 !important;
+  }
+  
+  .ant-table-thead th {
+    background-color: #f0f7ff !important;
+    color: #001529 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
+  .even-row {
+    background-color: #ffffff !important;
+  }
+  
+  .odd-row {
+    background-color: #f9f9f9 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* PDF Export Animation */
+.product-report-export-options {
+  position: relative;
+}
+
+.product-report-export-options .ant-btn {
+  transition: all 0.3s ease;
+}
+
+.product-report-export-options .ant-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-report-export-options .ant-dropdown-trigger {
+  position: relative;
+}
+
+.product-report-export-options .ant-dropdown-trigger::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #1890ff, #52c41a);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.product-report-export-options .ant-dropdown-trigger:hover::after {
+  transform: scaleX(1);
+}
+
+/* Success download animation */
+.success-message-animation {
+  animation: successPulse 1s ease-in-out;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Error message animation */
+.error-message-animation {
+  animation: errorShake 0.5s ease-in-out;
+}
+
+@keyframes errorShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+/* Summary section styling */
+.product-report-summary-section {
+  margin-bottom: 24px;
+}
+
+.product-report-summary-card {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.product-report-summary-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.09);
+  transform: translateY(-3px);
+}
+
+.product-report-summary-card.total-card {
+  border-left: 4px solid #1890ff;
+}
+
+.product-report-summary-card.status-card {
+  border-left: 4px solid #52c41a;
+}
+
+.product-report-summary-card.date-card {
+  border-left: 4px solid #faad14;
+}
+
+.product-report-summary-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: #595959;
+  display: flex;
+  align-items: center;
+}
+
+.product-report-summary-title .anticon {
+  font-size: 16px;
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.product-report-summary-card.status-card .product-report-summary-title .anticon {
+  color: #52c41a;
+}
+
+.product-report-summary-card.date-card .product-report-summary-title .anticon {
+  color: #faad14;
+}
+
+.product-report-summary-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  text-align: right;
+}
+
+.product-report-summary-footer .ant-btn:hover {
+  color: #1890ff;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.product-report-summary-footer .ant-dropdown-trigger {
+  transition: all 0.3s ease;
+}
+
+.product-report-summary-footer .ant-dropdown-trigger:hover {
+  color: #1890ff;
+  transform: translateY(-2px);
+}
+
+/* Status distribution list */
+.product-report-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-report-status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.product-report-status-count {
+  font-weight: bold;
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.product-report-status-item:hover .product-report-status-count {
+  background: #e6f7ff;
+  transform: scale(1.05);
+}
+
+/* Date info styling */
+.product-report-date-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-report-recent-date {
+  font-size: 20px;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 4px;
+}
+
+.product-report-date-ago {
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+/* Table header styling */
+.product-report-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 16px;
+  border-left: 3px solid #1890ff;
+}
+
+.product-report-table-title {
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  }
+
+.product-report-table-title .anticon {
+  font-size: 16px;
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.product-report-table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.product-report-refresh-table-button {
+  color: #1890ff;
+  transition: all 0.2s ease;
+}
+
+.product-report-refresh-table-button:hover {
+  background: rgba(24, 144, 255, 0.1);
+  transform: rotate(45deg);
+}
+
+/* Table summary styling */
+.product-report-table-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+}
+
+/* Tab badge styling */
+.product-report-tab-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-report-tab-badge {
+  margin-left: 4px;
+}
+
+.product-report-count-badge {
+  margin-right: 8px;
+}
+
+/* Enhanced date display in table */
+.product-report-table-date {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.product-report-table-date .product-report-date-ago {
+  margin-left: 8px;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* Improved table layout */
+.product-report-data-table {
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}

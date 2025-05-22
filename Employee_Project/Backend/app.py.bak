@@ -1,0 +1,3416 @@
+import json
+import uuid
+import csv
+import re
+import io
+from io import BytesIO ,StringIO 
+import traceback
+from datetime import datetime
+import pandas as pd
+from flask import send_file, make_response , redirect, url_for
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape, A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, HRFlowable, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+import os
+from flask import Flask, request, jsonify, url_for, send_from_directory
+from werkzeug.utils import secure_filename
+import mysql.connector
+from flask import send_from_directory
+from mysql.connector import Error
+from flask_cors import CORS
+from datetime import datetime, date  # Import both datetime and date
+import logging
+
+
+def check_table_structure():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            print("Database connection failed.")
+            return
+        
+        cursor = conn.cursor()
+        
+        # Get structure of employee_roles table
+        print("EMPLOYEE_ROLES TABLE STRUCTURE:")
+        cursor.execute("SHOW COLUMNS FROM employee_roles")
+        columns = cursor.fetchall()
+        for column in columns:
+            print(column)
+        
+        # Get a sample of data from employee_roles
+        print("\nSAMPLE DATA FROM EMPLOYEE_ROLES:")
+        cursor.execute("SELECT * FROM employee_roles LIMIT 5")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+        
+        cursor.close()
+        conn.close()
+        
+    except Error as e:
+        print(f"Error: {e}")
+        
+def format_date_for_db(date_str):
+    """
+    Formats a date string from DD-MM-YYYY format to YYYY-MM-DD format for database storage.
+    
+    Args:
+        date_str (str): The date string in DD-MM-YYYY format
+        
+    Returns:
+        str: The formatted date string in YYYY-MM-DD format, or None if invalid
+    """
+    if not date_str:
+        return None
+        
+    # First, check if the input is not a string
+    if not isinstance(date_str, str):
+        print(f"Invalid date format - not a string: {date_str}")
+        return datetime.datetime.now().strftime('%Y-%m-%d')
+    
+    # Remove any leading/trailing whitespace
+    date_str = date_str.strip()
+    
+    # Check if it's already in YYYY-MM-DD format
+    if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
+        return date_str
+    
+    # Parse DD-MM-YYYY format
+    try:
+        if re.match(r'^\d{2}-\d{2}-\d{4}$', date_str):
+            day, month, year = date_str.split('-')
+            # Validate date parts
+            day_int = int(day)
+            month_int = int(month)
+            year_int = int(year)
+            
+            # Basic validation
+            if not (1 <= day_int <= 31 and 1 <= month_int <= 12 and 1000 <= year_int <= 9999):
+                print(f"Date validation failed: {date_str}")
+                return datetime.datetime.now().strftime('%Y-%m-%d')
+                
+            # Create a datetime object to validate the date
+            try:
+                datetime.datetime(year_int, month_int, day_int)
+                return f"{year}-{month}-{day}"
+            except ValueError as e:
+                print(f"Invalid date: {e}")
+                return datetime.datetime.now().strftime('%Y-%m-%d')
+        else:
+            print(f"Date string doesn't match expected format: {date_str}")
+            return datetime.datetime.now().strftime('%Y-%m-%d')
+    except Exception as e:
+        print(f"Error processing date {date_str}: {e}")
+        return datetime.datetime.now().strftime('%Y-%m-%d')
+
+def sanitize_date_field(date_str):
+    """
+    Safely converts various date string formats to a standard YYYY-MM-DD format.
+    Handles both DD-MM-YYYY and YYYY-MM-DD input formats.
+    
+    Args:
+        date_str: A date string in various formats, or None/empty
+    
+    Returns:
+        A datetime.date object or None if input is invalid
+    """
+    from datetime import datetime
+    
+    if not date_str:
+        # Return today's date if no date provided
+        return datetime.now().date()
+    
+    # Remove any leading/trailing whitespace
+    date_str = str(date_str).strip()
+    
+    try:
+        # Try to parse as DD-MM-YYYY
+        if '-' in date_str:
+            parts = date_str.split('-')
+            if len(parts) == 3:
+                # Check if it's DD-MM-YYYY format (first part is day, likely 2 digits)
+                if len(parts[0]) <= 2 and int(parts[0]) <= 31:
+                    return datetime.strptime(date_str, '%d-%m-%Y').date()
+                # Otherwise assume YYYY-MM-DD
+                else:
+                    return datetime.strptime(date_str, '%Y-%m-%d').date()
+        
+        # Try to parse ISO format (or similar)
+        if ',' in date_str and 'GMT' in date_str:
+            # Handle format like 'Thu, 01 May 2025 00:00:00 GMT'
+            try:
+                return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %Z').date()
+            except ValueError:
+                # Try without seconds
+                return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S').date()
+        
+        # Last attempt - try using dateutil parser which is more flexible
+        try:
+            from dateutil import parser
+            return parser.parse(date_str).date()
+        except (ImportError, ValueError):
+            # If dateutil is not available or fails, return today
+            return datetime.now().date()
+            
+    except Exception as e:
+        print(f"Date parsing error: {e} for input: {date_str}")
+        # Return today's date as fallback
+        return datetime.now().date()
+
+
+
+
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+
+app = Flask(__name__)
+CORS(app)
+# Configure your upload folder and allowed extensions
+app.config['UPLOAD_FOLDER'] = './uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# Utility function to convert MySQL rows to dictionaries
+def row_to_dict(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+# Format dates for JSON response
+def format_dates(item):
+    date_fields = ['release_date', 'committed_date', 'initiative_date', 'target_completion_date', 'actual_completion_date']
+    for field in date_fields:
+        if field in item and item[field] and isinstance(item[field], datetime):
+            item[field] = item[field].strftime('%Y-%m-%d')
+    return item
+
+# Validate task data
+def validate_task_data(data):
+    errors = {}
+    
+    # Check required fields
+    required_fields = ['taskId', 'taskName', 'projectId', 'initiativeDate', 'targetCompletionDate', 'taskDescription']
+    for field in required_fields:
+        if field not in data or not data[field]:
+            errors[field] = f"{field} is required"
+    
+    # Additional validations
+    if 'taskName' in data and data['taskName']:
+        if len(data['taskName']) < 3:
+            errors['taskName'] = "Task name must be at least 3 characters"
+        elif len(data['taskName']) > 100:
+            errors['taskName'] = "Task name cannot exceed 100 characters"
+    
+    if 'taskDescription' in data and data['taskDescription']:
+        if len(data['taskDescription']) < 10:
+            errors['taskDescription'] = "Description must be at least 10 characters"
+        elif len(data['taskDescription']) > 500:
+            errors['taskDescription'] = "Description cannot exceed 500 characters"
+    
+    # Date validations
+    if 'initiativeDate' in data and 'targetCompletionDate' in data:
+        try:
+            init_date = datetime.strptime(data['initiativeDate'], '%Y-%m-%d')
+            target_date = datetime.strptime(data['targetCompletionDate'], '%Y-%m-%d')
+            
+            if target_date < init_date:
+                errors['targetCompletionDate'] = "Target completion date cannot be before initiative date"
+        except ValueError:
+            errors['dates'] = "Invalid date format. Use YYYY-MM-DD"
+    
+    return errors
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1')
+        cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return jsonify({"status": "healthy", "database": "connected"})
+    except Error as e:
+        return jsonify({"status": "unhealthy", "database": "disconnected", "error": str(e)}), 500
+
+
+# Create uploads directory if it doesn't exist
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def cursor_result_to_dict(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+def format_dates(item):
+    if item is None:
+        return item
+    
+    formatted_item = dict(item)  # Create a copy to avoid modifying the original
+    for key, value in formatted_item.items():
+        if isinstance(value, (date, datetime)):
+            formatted_item[key] = value.strftime('%Y-%m-%d')
+    return formatted_item
+
+class Role:
+    @staticmethod
+    def get_role_by_id(role_id):
+        cursor = mysql.connection.cursor()
+        query = "SELECT * FROM employee_roles WHERE role_id = %s"
+        cursor.execute(query, (role_id,))
+        role = cursor.fetchone()
+        return role
+
+class Employee:
+    @staticmethod
+    def get_employee_by_id(employee_id):
+        cursor = mysql.connection.cursor()
+        query = "SELECT * FROM employees WHERE employee_id = %s"
+        cursor.execute(query, (employee_id,))
+        employee = cursor.fetchone()
+        return employee
+
+# Function to check allowed file types for profile pictures
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# MySQL Database connection setup
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='employee_management_v2',
+            user='root',
+            password='password123'
+        )
+        if connection.is_connected():
+            return connection
+    except Error as e:
+        print(f"Error while connecting to MySQL: {e}")
+        return None
+
+# Initialize CORS
+CORS(app)  # Enable CORS for all routes
+
+# Route to save product data to MySQL
+@app.route('/products', methods=['POST'])
+def save_product():
+    try:
+        # Get data from the request
+        data = request.get_json()
+        # Extract values from the data
+        product_id = data.get('productId')
+        product_name = data.get('productName')
+        date_of_product = data.get('dateOfProduct')
+        product_status = data.get('productstatus')
+        product_description = data.get('productDescription')
+        product_technical = data.get('productTechnical')
+        product_specification = data.get('productSpecification')
+        product_framework = data.get('productFramework')
+        
+        # Validate required fields
+        if not all([product_id, product_name, date_of_product, product_status, 
+                    product_description, product_technical, product_specification, product_framework]):
+            return jsonify({'error': 'Missing required fields'}), 400
+        
+        # Connect to the database
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        cursor = conn.cursor()
+        
+        # Insert product into the database
+        insert_query = """
+            INSERT INTO products (
+                product_id, product_name, date_of_product, product_status,
+                product_description, product_technical, product_specification,
+                product_framework
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        values = (
+            product_id,
+            product_name,
+            date_of_product,
+            product_status,
+            product_description,
+            product_technical,
+            product_specification,
+            product_framework
+        )
+        cursor.execute(insert_query, values)
+        conn.commit()
+        
+        return jsonify({
+            'message': 'Product saved successfully',
+            'productId': product_id
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+    finally:
+        if 'conn' in locals() and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.route('/add_employee', methods=['POST'])
+def add_employee():
+    try:
+        # Retrieve employee data from the form
+        employee_data = request.form.get('employee')
+        if not employee_data:
+            return jsonify({"error": "Missing employee data."}), 400
+        
+        try:
+            # Parse the JSON data
+            employee = json.loads(employee_data)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Invalid JSON format."}), 400
+        
+        # Helper function to retrieve field value with optional default
+        def get(field, default=None): 
+            return employee.get(field, default)
+        
+        # List of required fields
+        required_fields = [
+            "employeeId", "firstName", "lastName", "dob", "gender", "nationality",
+            "permanentAddress", "communicationAddress", "mobile", "email",
+            "fatherName", "motherName", "maritalStatus", "emergencyName",
+            "emergencyMobile", "emergencyRelationship", "doj", "joiningLocation"
+        ]
+        
+        # Check if all required fields are present
+        for field in required_fields:
+            if not get(field):
+                return jsonify({"error": f"{field} is required."}), 400
+                
+        # Validate and format dates
+        dob = get("dob")  # Expecting 'DD-MM-YYYY' format
+        doj = get("doj")  # Expecting 'DD-MM-YYYY' format
+        
+        # Validate date formats
+        if dob:
+            try:
+                datetime.strptime(dob, '%d-%m-%Y')
+            except ValueError:
+                return jsonify({"error": "Invalid DOB format. Use DD-MM-YYYY."}), 400
+        if doj:
+            try:
+                datetime.strptime(doj, '%d-%m-%Y')
+            except ValueError:
+                return jsonify({"error": "Invalid DOJ format. Use DD-MM-YYYY."}), 400
+        
+        # Handle profile photo upload (if any)
+        profile_pic_url = None
+        if 'profilePic' in request.files:
+            file = request.files['profilePic']
+            if file and file.filename and allowed_file(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                unique_name = f"{uuid.uuid4().hex}.{ext}"
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+                file.save(filepath)
+                profile_pic_url = url_for('uploaded_file', filename=unique_name, _external=True)
+            elif file and file.filename:
+                return jsonify({"error": "Invalid file type. Only PNG, JPG, JPEG allowed."}), 400
+        
+        # Database connection
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        cursor = conn.cursor()
+        
+        # Prepare values for insertion
+        values = (
+            get("employeeId"),
+            get("firstName"),
+            get("lastName"),
+            dob,  # Stored as 'DD-MM-YYYY' string
+            get("gender"),
+            get("nationality"),
+            get("permanentAddress"),
+            get("communicationAddress"),
+            get("mobile"),
+            get("altMobile", ""),  # altMobile is optional
+            get("email"),
+            get("qualification", ""),  # qualification is optional
+            get("fatherName"),
+            get("motherName"),
+            get("maritalStatus"),
+            get("spouseName", ""),  # spouseName might be empty if not married
+            get("emergencyName"),
+            get("emergencyMobile"),
+            get("emergencyRelationship"),
+            doj,  # Stored as 'DD-MM-YYYY' string
+            get("joiningLocation"),
+            profile_pic_url
+        )
+        
+        # Insert new employee record
+        insert_query = """
+            INSERT INTO employees (
+                employee_id, first_name, last_name, dob, gender, nationality, permanent_address,
+                communication_address, mobile, alt_mobile, email, qualification, father_name, mother_name,
+                marital_status, spouse_name, emergency_name, emergency_mobile, emergency_relationship,
+                doj, joining_location, profile_pic
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        try:
+            cursor.execute(insert_query, values)
+            conn.commit()
+        except Error as e:
+            print(f"Error inserting employee data: {e}")
+            conn.rollback()
+            return jsonify({"error": f"Database error: {str(e)}"}), 500
+        finally:
+            cursor.close()
+            conn.close()
+            
+        return jsonify({
+            "status": "success",
+            "employeeID": get("employeeId"),
+            "profile_photo": profile_pic_url
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Exception: {e}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    
+@app.route('/add_employee_role', methods=['POST'])
+def add_employee_role():
+    try:
+        role_data = request.get_json()
+        
+        # Handle both old and new field names
+        role_description = role_data.get('roleDescription') or role_data.get('roleName')
+        
+        if not role_data.get('role_id') or not role_description or not role_data.get('roleType'):
+            return jsonify({"error": "Role ID, Role Description, and Role Type are required."}), 400
+        
+        role_id = role_data['role_id']
+        parent_role = role_data.get('parentRole', '')
+        role_type = role_data['roleType']
+        status = role_data.get('status', 'active')  # Default to 'active' if status not provided
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        cursor = conn.cursor()
+        
+        insert_role_query = """
+            INSERT INTO employee_roles (role_id, role_description, parent_role, role_type, status)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        try:
+            cursor.execute(insert_role_query, (role_id, role_description, parent_role, role_type, status))
+            conn.commit()
+        except Error as e:
+            print(f"Error inserting role data: {e}")
+            conn.rollback()
+            return jsonify({"error": f"Database error: {str(e)}"}), 500
+        finally:
+            cursor.close()
+            conn.close()
+        
+        return jsonify({"message": "Role details added successfully!"}), 201
+    
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": "Something went wrong while adding the role."}), 500
+
+@app.route('/update_employee_role', methods=['PUT'])
+def update_employee_role():
+    try:
+        role_data = request.get_json()
+        if not role_data.get('role_id') or not role_data.get('roleDescription') or not role_data.get('roleType'):
+            return jsonify({"error": "Role ID, Role Description, and Role Type are required."}), 400
+        
+        role_id = role_data['role_id']
+        role_description = role_data['roleDescription']
+        parent_role = role_data.get('parentRole', '')
+        role_type = role_data['roleType']
+        status = role_data.get('status')  # Get status if provided
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        cursor = conn.cursor()
+        
+        # Construct the query dynamically based on whether status is provided
+        if status is not None:
+            update_role_query = """
+                UPDATE employee_roles
+                SET role_description = %s, parent_role = %s, role_type = %s, status = %s
+                WHERE role_id = %s
+            """
+            query_params = (role_description, parent_role, role_type, status, role_id)
+        else:
+            update_role_query = """
+                UPDATE employee_roles
+                SET role_description = %s, parent_role = %s, role_type = %s
+                WHERE role_id = %s
+            """
+            query_params = (role_description, parent_role, role_type, role_id)
+        
+        try:
+            cursor.execute(update_role_query, query_params)
+            conn.commit()
+        except Error as e:
+            print(f"Error updating role data: {e}")
+            conn.rollback()
+            return jsonify({"error": f"Database error: {str(e)}"}), 500
+        finally:
+            cursor.close()
+            conn.close()
+        
+        return jsonify({"message": "Role details updated successfully!"}), 200
+    
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": "Something went wrong while updating the role."}), 500
+    
+@app.route('/api/employee_roles', methods=['GET'])
+def get_employee_roles():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM employee_roles")
+        roles = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(roles), 200
+    except Exception as e:
+        print(f"Error fetching employee roles: {e}")
+        return jsonify({"error": "Failed to fetch employee roles."}), 500
+
+@app.route('/get_employee_name/<employee_id>', methods=['GET'])
+def get_employee_name(employee_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        
+        cursor = conn.cursor()
+        cursor.execute("SELECT first_name, last_name FROM employees WHERE employee_id = %s", (employee_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if result:
+            return jsonify({'name': f"{result[0]} {result[1]}"})
+        
+        return jsonify({'name': ''}), 404
+    except Exception as e:
+        print(f"Error in get_employee_name: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
+    
+@app.route('/get_employees_by_role/<role_id>', methods=['GET'])
+def get_employees_by_role(role_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        
+        cursor = conn.cursor()
+        
+        # Query to find all employees with the specified role
+        # This assumes there's a table that maps employees to roles
+        # The table structure might vary, so we're providing a flexible approach
+        
+        # First, check if there's an employee_role_allocations table
+        try:
+            cursor.execute("""
+                SELECT e.employee_id, CONCAT(e.first_name, ' ', e.last_name) as name
+                FROM employees e
+                JOIN employee_role_allocations era ON e.employee_id = era.employee_id
+                WHERE era.role_id = %s
+            """, (role_id,))
+            
+            employees = []
+            for row in cursor.fetchall():
+                employees.append({
+                    "employeeId": row[0],
+                    "name": row[1]
+                })
+            
+            cursor.close()
+            conn.close()
+            
+            return jsonify({"employees": employees}), 200
+            
+        except Exception as table_error:
+            # If the first query fails, try an alternative approach
+            # Maybe there's a direct role_id column in the employees table
+            print(f"First query approach failed: {table_error}. Trying alternative...")
+            
+            cursor.execute("""
+                SELECT employee_id, CONCAT(first_name, ' ', last_name) as name
+                FROM employees
+                WHERE role_id = %s
+            """, (role_id,))
+            
+            employees = []
+            for row in cursor.fetchall():
+                employees.append({
+                    "employeeId": row[0],
+                    "name": row[1]
+                })
+            
+            cursor.close()
+            conn.close()
+            
+            return jsonify({"employees": employees}), 200
+            
+    except Exception as e:
+        print(f"Error in get_employees_by_role: {e}")
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/get_role_name/<role_id>', methods=['GET'])
+def get_role_name(role_id):
+    try:
+        # Fetch the role from the database using the role_id
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        # Check the structure of the employee_roles table first
+        cursor.execute("SHOW COLUMNS FROM employee_roles")
+        columns = cursor.fetchall()
+        
+        # Extract column names
+        column_names = [column[0] for column in columns]
+        
+        # Determine which query to use based on available columns
+        if 'role_description' in column_names:
+            cursor.execute("SELECT role_description FROM employee_roles WHERE role_id = %s", (role_id,))
+            field_name = 'roleDescription'
+        elif 'role_name' in column_names:
+            cursor.execute("SELECT role_name FROM employee_roles WHERE role_id = %s", (role_id,))
+            field_name = 'roleName'
+        elif 'rolename' in column_names:  # Try lowercase version
+            cursor.execute("SELECT rolename FROM employee_roles WHERE role_id = %s", (role_id,))
+            field_name = 'roleName'
+        elif 'description' in column_names:  # Try generic description field
+            cursor.execute("SELECT description FROM employee_roles WHERE role_id = %s", (role_id,))
+            field_name = 'roleDescription'
+        else:
+            # If we can't determine the right column, return both column list and error
+            return jsonify({
+                'error': 'Could not determine role name/description column',
+                'available_columns': column_names
+            }), 500
+        
+        role = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if role:
+            return jsonify({field_name: role[0]}), 200
+        else:
+            return jsonify({'error': 'Role not found'}), 404
+    except Exception as e:
+        print(f"Error in get_role_name: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/allocate_role', methods=['POST'])
+def allocate_role():
+    data = request.get_json()
+    
+    # Required fields
+    employee_id = data.get('employeeId')
+    employee_name = data.get('employeeName')
+    role_id = data.get('roleId')
+    role_name = data.get('roleName')
+    allocated_date = data.get('allocatedDate')
+    reporting_person = data.get('reportingPerson', '')  # Make it optional with default empty string
+    
+    # Validate required fields
+    if not all([employee_id, employee_name, role_id, role_name, allocated_date]):
+        return jsonify({"error": "Missing required fields"}), 400
+    
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        
+        cursor = conn.cursor()
+        
+        # Modified to use reporting_person directly without additional_employee fields
+        query = """
+            INSERT INTO employee_role_allocations 
+            (employee_id, employee_name, role_id, role_name, allocated_date, reporting_person)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        
+        cursor.execute(query, (
+            employee_id,
+            employee_name,
+            role_id,
+            role_name,
+            allocated_date,
+            reporting_person
+        ))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"message": "Role allocation saved successfully"}), 200
+    except Exception as e:
+        print(f"Error allocating role: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/get_employee_role/<employee_id>', methods=['GET'])
+def get_employee_role(employee_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        
+        cursor = conn.cursor()
+        
+        # First check if the employee exists
+        cursor.execute("SELECT first_name, last_name FROM employees WHERE employee_id = %s", (employee_id,))
+        employee = cursor.fetchone()
+        
+        if not employee:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Employee not found"}), 404
+        
+        # Get the employee's role from the employee_role_allocations table
+        # We're getting the most recent role allocation for this employee
+        cursor.execute("""
+            SELECT role_id, role_name 
+            FROM employee_role_allocations 
+            WHERE employee_id = %s 
+            ORDER BY allocated_date DESC 
+            LIMIT 1
+        """, (employee_id,))
+        
+        role = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if role:
+            return jsonify({
+                "roleId": role[0],
+                "roleName": role[1]
+            }), 200
+        else:
+            # If no role allocation found, return empty strings
+            return jsonify({
+                "roleId": "",
+                "roleName": ""
+            }), 200
+            
+    except Exception as e:
+        print(f"Error in get_employee_role: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    
+    
+@app.route('/get_role_hierarchy/<role_id>', methods=['GET'])
+def get_role_hierarchy(role_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        
+        cursor = conn.cursor()
+        
+        # First check if the role exists in employee_roles
+        cursor.execute("SELECT role_id FROM employee_roles WHERE role_id = %s", (role_id,))
+        role = cursor.fetchone()
+        
+        if not role:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Role not found"}), 404
+        
+        # Check if role_hierarchy table exists and has the necessary structure
+        try:
+            cursor.execute("""
+                SELECT parent_role_id 
+                FROM role_hierarchy 
+                WHERE role_id = %s
+            """, (role_id,))
+            
+            hierarchy = cursor.fetchone()
+            
+            if hierarchy and hierarchy[0]:
+                parent_role_id = hierarchy[0]
+                
+                # Get the parent role name
+                cursor.execute("SHOW COLUMNS FROM employee_roles")
+                columns = cursor.fetchall()
+                column_names = [column[0] for column in columns]
+                
+                if 'role_description' in column_names:
+                    cursor.execute("SELECT role_description FROM employee_roles WHERE role_id = %s", (parent_role_id,))
+                    field_name = 'parentRoleName'
+                elif 'role_name' in column_names:
+                    cursor.execute("SELECT role_name FROM employee_roles WHERE role_id = %s", (parent_role_id,))
+                    field_name = 'parentRoleName'
+                else:
+                    field_name = 'parentRoleName'
+                    cursor.execute("SELECT role_id FROM employee_roles WHERE role_id = %s", (parent_role_id,))
+                
+                parent_role = cursor.fetchone()
+                
+                cursor.close()
+                conn.close()
+                
+                if parent_role:
+                    return jsonify({
+                        "parentRoleId": parent_role_id,
+                        field_name: parent_role[0]
+                    }), 200
+                else:
+                    return jsonify({
+                        "parentRoleId": parent_role_id,
+                        field_name: ""
+                    }), 200
+            else:
+                cursor.close()
+                conn.close()
+                return jsonify({
+                    "parentRoleId": "",
+                    "parentRoleName": ""
+                }), 200
+                
+        except Exception as table_error:
+            # If the role_hierarchy table doesn't exist or there's another issue,
+            # we'll return an empty response rather than an error
+            print(f"Warning in get_role_hierarchy: {table_error}")
+            cursor.close()
+            conn.close()
+            return jsonify({
+                "parentRoleId": "",
+                "parentRoleName": ""
+            }), 200
+            
+    except Exception as e:
+        print(f"Error in get_role_hierarchy: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+
+@app.route('/get_employee_status/<employee_id>', methods=['GET'])
+def get_employee_status(employee_id):
+    try:
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cursor = connection.cursor(dictionary=True)
+
+        query = """
+            SELECT 
+                employee_name, 
+                role_name,
+                reporting_person
+            FROM employee_role_allocations
+            WHERE employee_id = %s
+            ORDER BY allocated_date DESC, id DESC
+            LIMIT 1
+        """
+        cursor.execute(query, (employee_id,))
+        result = cursor.fetchone()
+
+        if not result:
+            return jsonify({'error': 'Employee not found'}), 404
+
+        return jsonify({
+            'name': result['employee_name'],
+            'role_name': result['role_name'],
+            'reporting_person': result['reporting_person'] or ''
+        })
+
+    except Exception as e:
+        print(f"Error fetching employee status: {e}")
+        return jsonify({'error': f'Error fetching employee status: {str(e)}'}), 500
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
+@app.route('/update_employee_status/<string:employee_id>', methods=['POST'])
+def update_employee_status(employee_id):
+    try:
+        status_data = request.get_json()
+        if not status_data:
+            return jsonify({"error": "No data provided."}), 400
+            
+        status = status_data.get('status')
+        status_date = status_data.get('statusDate')  # Expecting 'DD/MM/YYYY' format
+        remarks = status_data.get('remarks', '')
+        
+        if not status or not status_date:
+            return jsonify({"error": "Status and statusDate are required."}), 400
+            
+        # Convert statusDate from DD/MM/YYYY to YYYY-MM-DD
+        try:
+            parsed_date = datetime.strptime(status_date, '%d/%m/%Y')
+            formatted_date = parsed_date.strftime('%Y-%m-%d')
+        except ValueError:
+            return jsonify({"error": "Invalid date format for statusDate. Use DD/MM/YYYY."}), 400
+            
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed."}), 500
+        cursor = conn.cursor()
+        
+        insert_query = """
+            INSERT INTO employee_status (employee_id, status, status_date, remarks)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            status = VALUES(status),
+            status_date = VALUES(status_date),
+            remarks = VALUES(remarks)
+        """
+        
+        cursor.execute(insert_query, (employee_id, status, formatted_date, remarks))
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"message": "Status updated successfully!"}), 200
+        
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": "Something went wrong while updating the status."}), 500
+
+@app.route('/clients', methods=['POST'])
+def save_client():
+    try:
+        # Get data from the request
+        data = request.get_json()
+        
+        # Extract values from the data
+        client_id = data.get('clientId')
+        client_name = data.get('clientName')
+        client_description = data.get('clientDescription')
+        client_address = data.get('clientAddress')
+        communication_email = data.get('communicationEmail')
+        contact_name = data.get('contactName')
+        contact_designation = data.get('contactDesignation')
+        contact_mobile = data.get('contactMobile')
+        contact_email = data.get('contactEmail')
+        reporting_to = data.get('reportingTo')
+        
+        # Validate required fields
+        if not all([client_id, client_name, client_description, client_address, communication_email,
+                    contact_name, contact_designation, contact_mobile, contact_email, reporting_to]):
+            return jsonify({'error': 'Missing required fields'}), 400
+            
+        # Connect to the database
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        cursor = conn.cursor()
+        
+        # Insert client into the database
+        insert_query = """
+            INSERT INTO clients (
+                client_id, client_name, client_description, client_address,
+                communication_email, contact_name, contact_designation,
+                contact_mobile, contact_email, reporting_to
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        values = (
+            client_id,
+            client_name,
+            client_description,
+            client_address,
+            communication_email,
+            contact_name,
+            contact_designation,
+            contact_mobile,
+            contact_email,
+            reporting_to
+        )
+        
+        cursor.execute(insert_query, values)
+        conn.commit()
+        
+        return jsonify({
+            'message': 'Client created successfully',
+            'clientId': client_id
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+        
+    finally:
+        if 'conn' in locals() and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.route('/get_client_name/<client_id>', methods=['GET'])
+def get_client_name(client_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT client_name FROM clients WHERE client_id = %s"
+        cursor.execute(query, (client_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if result:
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "Client not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/get_product_name/<product_id>', methods=['GET'])
+def get_product_name(product_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT product_name FROM products WHERE product_id = %s"
+        cursor.execute(query, (product_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if result:
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "Product not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Route to save project data to MySQL
+@app.route('/projects', methods=['POST'])
+def save_project():
+    try:
+        data = request.get_json()
+        project_id = data.get('projectId')
+        project_name = data.get('projectName')
+        project_client_id = data.get('projectClientId')
+        client_name = data.get('clientName')
+        product_id = data.get('productId')
+        product_name = data.get('productName')
+        managed_by = data.get('managedBy')
+        estimated_cost = data.get('estimatedCost')
+        completion_days = data.get('completionDays')
+        release_date_str = data.get('releaseDate')
+        committed_date_str = data.get('committedDate')
+        description = data.get('description')
+        
+        if not all([project_id, project_name, project_client_id, client_name, product_id, product_name, managed_by, 
+                    estimated_cost, completion_days, release_date_str, committed_date_str]):
+            return jsonify({'error': 'Missing required fields'}), 400
+            
+        # Convert dates from DD-MM-YYYY to YYYY-MM-DD
+        release_date = datetime.strptime(release_date_str, '%d-%m-%Y').date()
+        committed_date = datetime.strptime(committed_date_str, '%d-%m-%Y').date()
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        cursor = conn.cursor()
+        
+        insert_query = """
+            INSERT INTO projects (
+                project_id, project_name, project_client_id, client_name, product_id, product_name,
+                managed_by, estimated_cost, completion_days, release_date, committed_date, description
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        values = (
+            project_id,
+            project_name,
+            project_client_id,
+            client_name,
+            product_id,
+            product_name,
+            managed_by,
+            estimated_cost,
+            completion_days,
+            release_date,
+            committed_date,
+            description
+        )
+        
+        cursor.execute(insert_query, values)
+        conn.commit()
+        
+        return jsonify({
+            'message': 'Project created successfully',
+            'projectId': project_id
+        }), 201
+        
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+        return jsonify({'error': 'Invalid date format. Please use DD-MM-YYYY.'}), 400
+        
+    except Error as e:
+        print(f"Database error: {e}")
+        return jsonify({'error': 'Database error occurred'}), 500
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return jsonify({'error': str(e)}), 500
+        
+    finally:
+        if 'conn' in locals() and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.route('/api/employees', methods=['GET'])
+def get_employees():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
+        cursor = conn.cursor(dictionary=True)
+        
+        # Fetch employees with their role names
+        cursor.execute("""
+            SELECT 
+                employee_id, 
+                CONCAT(first_name, ' ', last_name) AS employee_name, 
+                profile_pic AS profile_photo, 
+                doj AS date_joined, 
+                email, 
+                mobile AS phone,
+                role_name
+            FROM employees
+        """)
+        
+        employees = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        # Format date_joined if it's a valid date string
+        for employee in employees:
+            if employee['date_joined']:
+                try:
+                    if isinstance(employee['date_joined'], date) and not isinstance(employee['date_joined'], datetime):
+                        employee['date_joined'] = employee['date_joined'].strftime('%d-%m-%Y')
+                    elif isinstance(employee['date_joined'], str):
+                        # If it's a string, parse it and then format
+                        date_obj = datetime.strptime(employee['date_joined'], '%Y-%m-%d')
+                        employee['date_joined'] = date_obj.strftime('%d-%m-%Y')
+                except (ValueError, TypeError):
+                    pass
+                    
+        return jsonify(employees)
+        
+    except mysql.connector.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+@app.route('/api/roles', methods=['GET'])
+def get_roles():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT role_id, role_name FROM employee_roles")
+        roles = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(roles)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/employees/<employee_id>', methods=['DELETE'])
+def delete_employee(employee_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM employees WHERE employee_id = %s", (employee_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"message": "Employee deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/product-details/<product_id>', methods=['GET'])
+def product_details(product_id):
+    try:
+        # Get database connection
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        # Create dictionary cursor
+        cursor = conn.cursor(dictionary=True)
+        
+        # Query for product details
+        product_query = """
+            SELECT * FROM products WHERE product_id = %s
+        """
+        
+        # Execute product query
+        cursor.execute(product_query, (product_id,))
+        product = cursor.fetchone()
+        
+        if not product:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Product not found"}), 404
+        
+        # Find projects associated with this product
+        project_query = """
+            SELECT * FROM projects WHERE product_id = %s
+        """
+        
+        # Execute project query
+        cursor.execute(project_query, (product_id,))
+        projects = cursor.fetchall()
+        
+        # Find clients associated with these projects
+        clients = []
+        if projects:
+            client_ids = [project['project_client_id'] for project in projects]
+            
+            # Build placeholders for IN clause
+            placeholders = ', '.join(['%s'] * len(client_ids))
+            
+            client_query = f"""
+                SELECT * FROM clients WHERE client_id IN ({placeholders})
+            """
+            
+            # Execute client query
+            cursor.execute(client_query, tuple(client_ids))
+            clients = cursor.fetchall()
+        
+        # Format dates for JSON
+        # Format the product dates
+        formatted_product = {}
+        for key, value in product.items():
+            if isinstance(value, (date, datetime)):
+                formatted_product[key] = value.strftime('%Y-%m-%d')
+            else:
+                formatted_product[key] = value
+        
+        # Format the project dates
+        formatted_projects = []
+        for project in projects:
+            formatted_project = {}
+            for key, value in project.items():
+                if isinstance(value, (date, datetime)):
+                    formatted_project[key] = value.strftime('%Y-%m-%d')
+                else:
+                    formatted_project[key] = value
+            formatted_projects.append(formatted_project)
+        
+        # Format the client dates
+        formatted_clients = []
+        for client in clients:
+            formatted_client = {}
+            for key, value in client.items():
+                if isinstance(value, (date, datetime)):
+                    formatted_client[key] = value.strftime('%Y-%m-%d')
+                else:
+                    formatted_client[key] = value
+            formatted_clients.append(formatted_client)
+        
+        # Close cursor and connection
+        cursor.close()
+        conn.close()
+        
+        # Return combined data
+        result = {
+            "product": formatted_product,
+            "projects": formatted_projects,
+            "clients": formatted_clients
+        }
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        print(f"Error in product details: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/product-update/<product_id>', methods=['PUT'])
+def update_product(product_id):
+    """Update a product's information"""
+    try:
+        data = request.get_json()
+        
+        # Extract values from the data
+        product_name = data.get('productName')
+        product_status = data.get('productStatus')
+        product_description = data.get('productDescription')
+        product_technical = data.get('productTechnical')
+        product_specification = data.get('productSpecification')
+        product_framework = data.get('productFramework')
+        
+        # Connect to the database
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        cursor = conn.cursor()
+        
+        # Update product in the database
+        update_query = """
+            UPDATE products 
+            SET 
+                product_name = %s, 
+                product_status = %s, 
+                product_description = %s, 
+                product_technical = %s, 
+                product_specification = %s, 
+                product_framework = %s
+            WHERE product_id = %s
+        """
+        
+        values = (
+            product_name,
+            product_status,
+            product_description,
+            product_technical,
+            product_specification,
+            product_framework,
+            product_id
+        )
+        
+        cursor.execute(update_query, values)
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Product updated successfully',
+            'productId': product_id
+        }), 200
+        
+    except Exception as e:
+        print(f"Error in update_product: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    
+    
+@app.route('/api/product-report', methods=['GET'])
+def get_product_report():
+    product_id = request.args.get('productId', '')
+    
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        if product_id:
+            query = """
+            SELECT product_id, product_name, date_of_product, product_status
+            FROM products
+            WHERE product_id LIKE %s
+            """
+            cursor.execute(query, (f"%{product_id}%",))
+        else:
+            query = """
+            SELECT product_id, product_name, date_of_product, product_status
+            FROM products
+            LIMIT 100
+            """
+            cursor.execute(query)
+        
+        products = cursor_result_to_dict(cursor)
+        formatted_products = [format_dates(product) for product in products]
+        
+        return jsonify(formatted_products)
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+@app.route('/api/client-report', methods=['GET'])
+def get_client_report():
+    client_id = request.args.get('clientId', '')
+    
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        if client_id:
+            query = """
+            SELECT client_id, client_name, client_address, communication_email, contact_mobile
+            FROM clients
+            WHERE client_id LIKE %s
+            """
+            cursor.execute(query, (f"%{client_id}%",))
+        else:
+            query = """
+            SELECT client_id, client_name, client_address, communication_email, contact_mobile
+            FROM clients
+            LIMIT 100
+            """
+            cursor.execute(query)
+        
+        clients = cursor_result_to_dict(cursor)
+        
+        return jsonify(clients)
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# Project Report Endpoint
+@app.route('/api/project-report', methods=['GET'])
+def get_project_report():
+    project_id = request.args.get('projectId', '')
+    
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        if project_id:
+            query = """
+            SELECT project_id, project_name, description, release_date, committed_date, estimated_cost
+            FROM projects
+            WHERE project_id LIKE %s
+            """
+            cursor.execute(query, (f"%{project_id}%",))
+        else:
+            query = """
+            SELECT project_id, project_name, description, release_date, committed_date, estimated_cost
+            FROM projects
+            LIMIT 100
+            """
+            cursor.execute(query)
+        
+        projects = cursor_result_to_dict(cursor)
+        formatted_projects = [format_dates(project) for project in projects]
+        
+        return jsonify(formatted_projects)
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+    
+    
+@app.route('/api/check-schema', methods=['GET'])
+def check_schema():
+    conn = None
+    cursor = None
+    try:
+        # Get database connection
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get all tables in the database
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+        
+        schema_info = {}
+        
+        # For each table, get column information
+        for table_row in tables:
+            table_name = list(table_row.values())[0]  # Get table name from the result
+            cursor.execute(f"DESCRIBE {table_name}")
+            columns = cursor.fetchall()
+            
+            # Extract column names and types
+            column_info = []
+            for col in columns:
+                column_info.append({
+                    'name': col['Field'],
+                    'type': col['Type'],
+                    'null': col['Null'],
+                    'key': col['Key'],
+                    'default': col['Default'],
+                    'extra': col['Extra']
+                })
+            
+            schema_info[table_name] = column_info
+        
+        return jsonify({
+            'tables': [list(table.values())[0] for table in tables],
+            'schema': schema_info
+        })
+        
+    except Exception as e:
+        import traceback
+        print(f"Error checking schema: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+        
+    finally:
+        if cursor:
+            cursor.close()
+        if conn and conn.is_connected():
+            conn.close()
+            
+@app.route('/api/product/<product_id>', methods=['GET'])
+def get_product_detail(product_id):
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        query = """
+        SELECT *
+        FROM products
+        WHERE product_id = %s
+        """
+        cursor.execute(query, (product_id,))
+        
+        products = cursor_result_to_dict(cursor)
+        if products:
+            formatted_product = format_dates(products[0])
+            return jsonify(formatted_product)
+        else:
+            return jsonify({"error": "Product not found"}), 404
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            
+@app.route('/api/client/<client_id>', methods=['GET'])
+def get_client_detail(client_id):
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        query = """
+        SELECT *
+        FROM clients
+        WHERE client_id = %s
+        """
+        cursor.execute(query, (client_id,))
+        
+        clients = cursor_result_to_dict(cursor)
+        if clients:
+            formatted_client = format_dates(clients[0])
+            return jsonify(formatted_client)
+        else:
+            return jsonify({"error": "Client not found"}), 404
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            
+
+# Project detail endpoint (for View button)
+@app.route('/api/project/<project_id>', methods=['GET'])
+def get_project_detail(project_id):
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        query = """
+        SELECT *
+        FROM projects
+        WHERE project_id = %s
+        """
+        cursor.execute(query, (project_id,))
+        
+        projects = cursor_result_to_dict(cursor)
+        if projects:
+            formatted_project = format_dates(projects[0])
+            return jsonify(formatted_project)
+        else:
+            return jsonify({"error": "Project not found"}), 404
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            
+@app.route('/projects', methods=['GET'])
+def get_all_projects():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT project_id, project_name, project_client_id, client_name, 
+                  product_id, product_name, managed_by, estimated_cost, completion_days, 
+                  release_date, committed_date, description
+                  FROM projects"""
+        cursor.execute(query)
+        projects = cursor.fetchall()
+
+        formatted_projects = [format_dates(project) for project in projects]
+        return jsonify(formatted_projects), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'conn' in locals() and conn.is_connected():
+            conn.close()
+# Function to log downloads in the database
+def log_download(report_type, entity_id, download_format, record_count, filter_params=None):
+    """
+    Log download activity to the database
+    
+    Args:
+        report_type (str): Type of report ('project', 'product', 'client')
+        entity_id (str): ID of the specific entity or None for multiple
+        download_format (str): Format of the download ('csv', 'pdf')
+        record_count (int): Number of records in the report
+        filter_params (dict, optional): Dictionary of filter parameters
+    """
+    try:
+        conn = get_db_connection()
+        if not conn:
+            print("Failed to connect to database for logging download")
+            return False
+            
+        cursor = conn.cursor()
+        
+        # Get user information
+        user_id = request.args.get('userId', None)  # Assuming userId might be passed as a parameter
+        ip_address = request.remote_addr
+        
+        # Convert filter params to JSON string if provided
+        filter_json = json.dumps(filter_params) if filter_params else None
+        
+        # Insert download log
+        insert_query = """
+            INSERT INTO download_logs (
+                user_id, report_type, entity_id, download_format, 
+                ip_address, download_date, filter_params, record_count
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        values = (
+            user_id,
+            report_type,
+            entity_id,
+            download_format,
+            ip_address,
+            datetime.now(),
+            filter_json,
+            record_count
+        )
+        
+        cursor.execute(insert_query, values)
+        conn.commit()
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error logging download: {str(e)}")
+        return False
+        
+    finally:
+        if 'conn' in locals() and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.route('/api/download-project-report/<format>', methods=['GET'])
+def download_project_report(format):
+    project_id = request.args.get('projectId', '')
+    filter_params = {
+        'projectId': project_id
+    }
+    
+    print(f"Downloading project report in {format} format with projectId: '{project_id}'")
+    
+    conn = get_db_connection()
+    if conn is None:
+        print("Database connection failed when downloading project report")
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = conn.cursor(dictionary=True)
+        
+        if project_id:
+            print(f"Fetching specific project with ID like: {project_id}")
+            query = """
+            SELECT project_id, project_name, project_client_id, client_name, product_id, 
+                  product_name, managed_by, estimated_cost, completion_days, 
+                  release_date, committed_date, description
+            FROM projects
+            WHERE project_id LIKE %s
+            """
+            cursor.execute(query, (f"%{project_id}%",))
+        else:
+            print("Fetching all projects")
+            query = """
+            SELECT project_id, project_name, project_client_id, client_name, product_id, 
+                  product_name, managed_by, estimated_cost, completion_days, 
+                  release_date, committed_date, description
+            FROM projects
+            LIMIT 100
+            """
+            cursor.execute(query)
+        
+        # Use dictionary cursor to get projects
+        projects = cursor.fetchall()
+        print(f"Found {len(projects)} projects for report")
+        
+        # If no projects found, return a sample project
+        if not projects:
+            print("No projects found, returning a sample project for testing")
+            sample_project = {
+                "project_id": "SAMPLE_PRJ",
+                "project_name": "Sample Project",
+                "project_client_id": "SAMPLE_CLIENT",
+                "client_name": "Sample Client",
+                "product_id": "SAMPLE_PROD",
+                "product_name": "Sample Product",
+                "managed_by": "Sample Manager",
+                "estimated_cost": "1000.00",
+                "completion_days": "30",
+                "release_date": datetime.now().strftime("%Y-%m-%d"),
+                "committed_date": datetime.now().strftime("%Y-%m-%d"),
+                "description": "This is a sample project for testing export functionality"
+            }
+            projects = [sample_project]
+        
+        # Format dates for display
+        formatted_projects = []
+        for project in projects:
+            formatted_project = {}
+            for key, value in project.items():
+                if isinstance(value, datetime):
+                    formatted_project[key] = value.strftime('%Y-%m-%d')
+                else:
+                    formatted_project[key] = value
+            formatted_projects.append(formatted_project)
+        
+        # Log download
+        log_download(
+            report_type='project',
+            entity_id=project_id if project_id else None,
+            download_format=format.lower(),
+            record_count=len(formatted_projects),
+            filter_params=filter_params
+        )
+        
+        # Generate and return report
+        if format.lower() == 'csv':
+            print("Generating CSV report")
+            return generate_csv_report(formatted_projects, 'project_report')
+        elif format.lower() == 'pdf':
+            print("Generating PDF report")
+            return generate_pdf_report(formatted_projects, 'Project Report')
+        else:
+            print(f"Invalid format requested: {format}")
+            return jsonify({"error": "Invalid format. Use 'csv' or 'pdf'"}), 400
+            
+    except Exception as e:
+        print(f"Error in download_project_report: {str(e)}")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+            print("Database connection closed")
+
+@app.route('/api/download-product-report/<format>', methods=['GET'])
+def download_product_report(format):
+    product_id = request.args.get('productId', '')
+    filter_params = {
+        'productId': product_id
+    }
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        if product_id:
+            query = """
+            SELECT product_id, product_name, date_of_product, product_status,
+                  product_description, product_technical, product_specification, product_framework
+            FROM products
+            WHERE product_id LIKE %s
+            """
+            cursor.execute(query, (f"%{product_id}%",))
+        else:
+            query = """
+            SELECT product_id, product_name, date_of_product, product_status,
+                  product_description, product_technical, product_specification, product_framework
+            FROM products
+            LIMIT 100
+            """
+            cursor.execute(query)
+        
+        products = cursor_result_to_dict(cursor)
+        formatted_products = [format_dates(product) for product in products]
+        
+        log_download(
+            report_type='product',
+            entity_id=product_id if product_id else None,
+            download_format=format.lower(),
+            record_count=len(formatted_products),
+            filter_params=filter_params
+        )
+        
+        if format.lower() == 'csv':
+            return generate_csv_report(formatted_products, 'product_report')
+        elif format.lower() == 'pdf':
+            return generate_pdf_report(formatted_products, 'Product Report')
+        else:
+            return jsonify({"error": "Invalid format. Use 'csv' or 'pdf'"}), 400
+            
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@app.route('/api/download-client-report/<format>', methods=['GET'])
+def download_client_report(format):
+    client_id = request.args.get('clientId', '')
+    filter_params = {
+        'clientId': client_id
+    }
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        if client_id:
+            query = """
+            SELECT client_id, client_name, client_description, client_address, 
+                  communication_email, contact_name, contact_designation,
+                  contact_mobile, contact_email, reporting_to
+            FROM clients
+            WHERE client_id LIKE %s
+            """
+            cursor.execute(query, (f"%{client_id}%",))
+        else:
+            query = """
+            SELECT client_id, client_name, client_description, client_address, 
+                  communication_email, contact_name, contact_designation,
+                  contact_mobile, contact_email, reporting_to
+            FROM clients
+            LIMIT 100
+            """
+            cursor.execute(query)
+        
+        clients = cursor_result_to_dict(cursor)
+        
+        log_download(
+            report_type='client',
+            entity_id=client_id if client_id else None,
+            download_format=format.lower(),
+            record_count=len(clients),
+            filter_params=filter_params
+        )
+        
+        if format.lower() == 'csv':
+            return generate_csv_report(clients, 'client_report')
+        elif format.lower() == 'pdf':
+            return generate_pdf_report(clients, 'Client Report')
+        else:
+            return jsonify({"error": "Invalid format. Use 'csv' or 'pdf'"}), 400
+            
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+def generate_csv_report(data, filename_prefix):
+    if not data:
+        return jsonify({"error": "No data to export"}), 404
+    
+    try:
+        # Make sure we're using StringIO from io module
+        output = StringIO()
+        
+        if data:
+            fieldnames = data[0].keys()
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in data:
+                writer.writerow(row)
+        
+        # Convert to bytes for HTTP response
+        csv_bytes = output.getvalue().encode('utf-8')
+        response = make_response(csv_bytes)
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        response.headers["Content-Disposition"] = f"attachment; filename={filename_prefix}_{timestamp}.csv"
+        response.headers["Content-Type"] = "text/csv; charset=utf-8"
+        
+        return response
+    except Exception as e:
+        logger.error(f"CSV generation error: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": f"Failed to generate CSV: {str(e)}"}), 500
+
+
+def generate_pdf_report(data, report_title):
+    if not data:
+        logger.error("No data to export")
+        return jsonify({"error": "No data to export"}), 404
+    
+    try:
+        # Improved PDF design with better layout and styling
+        buffer = BytesIO()
+        # Use landscape for wider reports, A4 is a bit bigger than letter
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=landscape(A4),
+            leftMargin=36, 
+            rightMargin=36, 
+            topMargin=72, 
+            bottomMargin=72
+        )
+        
+        # Get styles and add custom styles
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(
+            name='ReportTitle',
+            parent=styles['Title'],
+            fontSize=20,
+            textColor=colors.HexColor("#003366"),
+            spaceAfter=12,
+            alignment=1  # Center alignment
+        ))
+        styles.add(ParagraphStyle(
+            name='ReportSubtitle',
+            parent=styles['Normal'],
+            fontSize=12,
+            textColor=colors.HexColor("#666666"),
+            spaceAfter=20,
+            alignment=1  # Center alignment
+        ))
+        styles.add(ParagraphStyle(
+            name='TableHeader',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.whitesmoke,
+            fontName='Helvetica-Bold',
+            alignment=1  # Center alignment
+        ))
+        styles.add(ParagraphStyle(
+            name='FooterText',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.HexColor("#666666"),
+            alignment=1  # Center alignment
+        ))
+        styles.add(ParagraphStyle(
+            name='SummaryHeading',
+            parent=styles['Heading2'],
+            fontSize=14,
+            textColor=colors.HexColor("#003366"),
+            spaceBefore=10,
+            spaceAfter=6
+        ))
+        
+        # List to store document elements
+        elements = []
+        
+        # Create title and subtitle
+        title = Paragraph(f"{report_title}", styles['ReportTitle'])
+        elements.append(title)
+        
+        # Add subtitle with current date
+        current_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        subtitle = Paragraph(f"Generated on {current_date}", styles['ReportSubtitle'])
+        elements.append(subtitle)
+        
+        # Add a horizontal line after the title
+        elements.append(HRFlowable(
+            width="100%", 
+            thickness=1, 
+            color=colors.HexColor("#003366"),
+            spaceBefore=10,
+            spaceAfter=20
+        ))
+        
+        # Add a summary section if data is available
+        if data:
+            elements.append(Paragraph("Report Summary", styles['SummaryHeading']))
+            
+            # Create a summary table with key information
+            summary_data = [
+                ["Records", str(len(data))],
+                ["Report Type", report_title.split(' - ')[0] if ' - ' in report_title else report_title],
+                ["Generated At", current_date]
+            ]
+            
+            # Add entity ID if present in the title (e.g., "Product Report - P123")
+            if ' - ' in report_title:
+                entity_id = report_title.split(' - ')[1]
+                summary_data.insert(1, ["ID", entity_id])
+            
+            summary_table = Table(summary_data, colWidths=[100, 200])
+            summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, -1), colors.HexColor("#E8F1F8")),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor("#003366")),
+                ('ALIGNMENT', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#003366")),
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.HexColor("#AED6F1"))
+            ]))
+            
+            elements.append(summary_table)
+            elements.append(Spacer(1, 20))
+            
+            headers = list(data[0].keys())
+            if headers:
+                # Format data for table, apply paragraph styling to headers
+                styled_headers = [Paragraph(header.replace('_', ' ').title(), styles['TableHeader']) for header in headers]
+                table_data = [styled_headers]
+                
+                # Process data rows - limit cell content length and handle date formatting
+                for row in data:
+                    table_row = []
+                    for header in headers:
+                        value = row.get(header, '')
+                        
+                        # Limit long text fields
+                        if isinstance(value, str) and len(value) > 100:
+                            value = value[:97] + '...'
+                        
+                        # Format values appropriately
+                        if isinstance(value, (int, float)):
+                            # Format numbers with commas for thousands
+                            if isinstance(value, int):
+                                formatted_value = "{:,}".format(value)
+                            else:
+                                formatted_value = "{:,.2f}".format(value)
+                            table_row.append(formatted_value)
+                        else:
+                            table_row.append(str(value))
+                    
+                    table_data.append(table_row)
+                
+                # Auto-calculate column widths based on available space
+                page_width = landscape(A4)[0] - doc.leftMargin - doc.rightMargin
+                col_width = page_width / len(headers)
+                
+                # Set minimum and maximum column widths
+                min_width = 60
+                max_width = 200
+                
+                # Adjust column widths based on content type
+                col_widths = []
+                for header in headers:
+                    header_lower = header.lower()
+                    if 'id' in header_lower or 'date' in header_lower:
+                        col_widths.append(min(max(min_width, col_width * 0.7), max_width))
+                    elif 'name' in header_lower or 'description' in header_lower:
+                        col_widths.append(min(max(min_width, col_width * 1.3), max_width))
+                    else:
+                        col_widths.append(min(max(min_width, col_width), max_width))
+                
+                # Create the table with calculated column widths
+                table = Table(table_data, colWidths=col_widths, repeatRows=1)
+                
+                # Define the table style with improved colors and formatting
+                base_style = [
+                    # Header styling
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#003366")),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('TOPPADDING', (0, 0), (-1, 0), 12),
+                    
+                    # Content styling
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+                    ('TOPPADDING', (0, 1), (-1, -1), 6),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                    
+                    # Grid styling
+                    ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#003366")),
+                    ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.lightgrey),
+                    
+                    # Number alignment
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ]
+                
+                # Add alternating row colors
+                for i in range(1, len(table_data)):
+                    if i % 2 == 0:
+                        base_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor("#F5F8FA")))
+                    else:
+                        base_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor("#E8F1F8")))
+                
+                # Apply conditional formatting for status or state columns
+                for i, header in enumerate(headers):
+                    if header.lower() in ['status', 'state']:
+                        for row_idx in range(1, len(table_data)):
+                            value = table_data[row_idx][i].lower() if table_data[row_idx][i] else ""
+                            if 'active' in value or 'completed' in value or 'success' in value:
+                                base_style.append(('TEXTCOLOR', (i, row_idx), (i, row_idx), colors.HexColor("#006400")))
+                            elif 'inactive' in value or 'pending' in value or 'in progress' in value:
+                                base_style.append(('TEXTCOLOR', (i, row_idx), (i, row_idx), colors.HexColor("#FFA500")))
+                            elif 'error' in value or 'failed' in value or 'cancelled' in value:
+                                base_style.append(('TEXTCOLOR', (i, row_idx), (i, row_idx), colors.HexColor("#8B0000")))
+                
+                # Apply the table style
+                table.setStyle(TableStyle(base_style))
+                
+                # Add the table to the document
+                elements.append(table)
+        else:
+            elements.append(Paragraph("No data available for this report", styles['Normal']))
+        
+        # Create a function for headers and footers
+        def header_footer(canvas, doc):
+            # Save the state of the canvas
+            canvas.saveState()
+            
+            # Header with company logo (create a dummy logo with canvas)
+            canvas.setFillColor(colors.HexColor("#003366"))
+            canvas.rect(36, landscape(A4)[1] - 50, landscape(A4)[0] - 72, 30, fill=1)
+            
+            # Company logo (simulated with text for now)
+            canvas.setFillColor(colors.white)
+            canvas.setFont('Helvetica-Bold', 16)
+            canvas.drawString(46, landscape(A4)[1] - 30, "EMPLOYEE MANAGEMENT SYSTEM")
+            
+            # Footer with page numbers
+            canvas.setFont('Helvetica', 8)
+            canvas.setFillColor(colors.HexColor("#666666"))
+            page_num = canvas.getPageNumber()
+            text = f"Page {page_num}"
+            canvas.drawRightString(landscape(A4)[0] - 36, 36, text)
+            
+            # Footer line
+            canvas.setStrokeColor(colors.HexColor("#003366"))
+            canvas.line(36, 50, landscape(A4)[0] - 36, 50)
+            
+            # Footer text
+            canvas.drawCentredString(landscape(A4)[0]/2, 36, 
+                                   f"Employee Management System • Report Generated on {datetime.now().strftime('%Y-%m-%d')}")
+            
+            # Restore the state of the canvas
+            canvas.restoreState()
+        
+        # Build the PDF with the header and footer
+        doc.build(elements, onFirstPage=header_footer, onLaterPages=header_footer)
+        
+        # Prepare the response
+        buffer.seek(0)
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'inline; filename="{report_title.replace(" ", "_")}.pdf"'
+        
+        return response
+    except Exception as e:
+        logger.error(f"PDF generation error: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": f"Failed to generate PDF: {str(e)}"}), 500
+    
+# Add these routes to get download statistics
+@app.route('/api/download-stats', methods=['GET'])
+def get_download_stats():
+    """Get statistics about report downloads"""
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor(dictionary=True)
+        
+        # Get overall download count by type and format
+        query_overall = """
+        SELECT 
+            report_type, 
+            download_format, 
+            COUNT(*) as download_count
+        FROM download_logs
+        GROUP BY report_type, download_format
+        ORDER BY report_type, download_format
+        """
+        cursor.execute(query_overall)
+        overall_stats = cursor.fetchall()
+        
+        # Get recent downloads (last 30 days)
+        query_recent = """
+        SELECT 
+            log_id,
+            report_type,
+            entity_id,
+            download_format,
+            download_date,
+            record_count
+        FROM download_logs
+        WHERE download_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        ORDER BY download_date DESC
+        LIMIT 100
+        """
+        cursor.execute(query_recent)
+        recent_downloads = cursor.fetchall()
+        
+        # Format dates for JSON response
+        formatted_downloads = []
+        for download in recent_downloads:
+            formatted_download = {}
+            for key, value in download.items():
+                if isinstance(value, datetime):
+                    formatted_download[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    formatted_download[key] = value
+            formatted_downloads.append(formatted_download)
+        
+        return jsonify({
+            'overall_stats': overall_stats,
+            'recent_downloads': formatted_downloads
+        })
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+        
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+@app.route('/api/download-report/<int:log_id>/repeat', methods=['GET'])
+def repeat_download(log_id):
+    """Repeat a previous download based on its log ID"""
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor(dictionary=True)
+        
+        # Get the download log entry
+        query = "SELECT * FROM download_logs WHERE log_id = %s"
+        cursor.execute(query, (log_id,))
+        log_entry = cursor.fetchone()
+        
+        if not log_entry:
+            return jsonify({"error": "Download log not found"}), 404
+            
+        # Parse filter parameters
+        filter_params = json.loads(log_entry.get('filter_params', '{}')) if log_entry.get('filter_params') else {}
+        
+        # Set query parameters for redirection
+        query_string = '&'.join([f"{key}={value}" for key, value in filter_params.items() if value])
+        
+        # Determine which endpoint to call
+        report_type = log_entry.get('report_type')
+        download_format = log_entry.get('download_format')
+        
+        if not report_type or not download_format:
+            return jsonify({"error": "Invalid log entry data"}), 400
+            
+        # Redirect to appropriate download endpoint
+        redirect_url = f"/api/download-{report_type}-report/{download_format}"
+        if query_string:
+            redirect_url += f"?{query_string}"
+            
+        # Return URL for frontend to redirect
+        return jsonify({"redirect_url": redirect_url}), 200
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+        
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            
+# Add these API routes to support the download log admin interface
+
+@app.route('/api/download-logs', methods=['GET'])
+def get_download_logs():
+    """Get all download logs with optional filtering"""
+    # Get filter parameters
+    report_type = request.args.get('reportType', '')
+    download_format = request.args.get('format', '')
+    start_date = request.args.get('startDate', '')
+    end_date = request.args.get('endDate', '')
+    limit = int(request.args.get('limit', 100))  # Default to 100 records
+    
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor(dictionary=True)
+        
+        # Build query with optional filters
+        query = "SELECT * FROM download_logs WHERE 1=1"
+        params = []
+        
+        if report_type:
+            query += " AND report_type = %s"
+            params.append(report_type)
+            
+        if download_format:
+            query += " AND download_format = %s"
+            params.append(download_format)
+            
+        if start_date:
+            query += " AND download_date >= %s"
+            params.append(start_date)
+            
+        if end_date:
+            query += " AND download_date <= %s"
+            params.append(end_date)
+            
+        query += " ORDER BY download_date DESC LIMIT %s"
+        params.append(limit)
+        
+        cursor.execute(query, params)
+        logs = cursor.fetchall()
+        
+        # Format dates
+        formatted_logs = []
+        for log in logs:
+            formatted_log = {}
+            for key, value in log.items():
+                if isinstance(value, datetime):
+                    formatted_log[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    formatted_log[key] = value
+            formatted_logs.append(formatted_log)
+            
+        return jsonify(formatted_logs)
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+        
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+@app.route('/api/download-stats/summary', methods=['GET'])
+def get_download_summary():
+    """Get summary statistics about downloads"""
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor(dictionary=True)
+        
+        # Get download count by report type
+        cursor.execute("""
+            SELECT report_type, COUNT(*) as count 
+            FROM download_logs 
+            GROUP BY report_type
+        """)
+        by_report_type = cursor.fetchall()
+        
+        # Get download count by format
+        cursor.execute("""
+            SELECT download_format, COUNT(*) as count 
+            FROM download_logs 
+            GROUP BY download_format
+        """)
+        by_format = cursor.fetchall()
+        
+        # Get daily downloads for the last 30 days
+        cursor.execute("""
+            SELECT 
+                DATE(download_date) as date, 
+                COUNT(*) as count 
+            FROM download_logs 
+            WHERE download_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY DATE(download_date)
+            ORDER BY date
+        """)
+        daily_counts = cursor.fetchall()
+        
+        # Format dates in daily counts
+        formatted_daily = []
+        for item in daily_counts:
+            formatted_item = {}
+            for key, value in item.items():
+                if isinstance(value, date):
+                    formatted_item[key] = value.strftime('%Y-%m-%d')
+                else:
+                    formatted_item[key] = value
+            formatted_daily.append(formatted_item)
+        
+        # Get top downloaded entities
+        cursor.execute("""
+            SELECT 
+                report_type,
+                entity_id,
+                COUNT(*) as download_count
+            FROM download_logs
+            WHERE entity_id IS NOT NULL
+            GROUP BY report_type, entity_id
+            ORDER BY download_count DESC
+            LIMIT 10
+        """)
+        top_entities = cursor.fetchall()
+        
+        return jsonify({
+            'by_report_type': by_report_type,
+            'by_format': by_format,
+            'daily_counts': formatted_daily,
+            'top_entities': top_entities
+        })
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+        
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+@app.route('/api/download-logs/<int:log_id>', methods=['DELETE'])
+def delete_download_log(log_id):
+    """Delete a specific download log entry"""
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        # Delete the log entry
+        cursor.execute("DELETE FROM download_logs WHERE log_id = %s", (log_id,))
+        connection.commit()
+        
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Log entry not found"}), 404
+            
+        return jsonify({"message": "Log entry deleted successfully"}), 200
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+        
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+@app.route('/api/download-logs/clear', methods=['POST'])
+def clear_download_logs():
+    """Clear all download logs older than a specified date"""
+    data = request.get_json()
+    if not data or 'olderThan' not in data:
+        return jsonify({"error": "Missing required parameter 'olderThan'"}), 400
+        
+    older_than = data.get('olderThan')  # Should be in YYYY-MM-DD format
+    
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = connection.cursor()
+        
+        # Clear log entries older than the specified date
+        cursor.execute("DELETE FROM download_logs WHERE download_date < %s", (older_than,))
+        connection.commit()
+        
+        return jsonify({
+            "message": "Log entries cleared successfully", 
+            "deletedCount": cursor.rowcount
+        }), 200
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+        
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            
+@app.route('/api/project-download/<project_id>', methods=['GET'])
+def download_project_by_id(project_id):
+    format = request.args.get('format', 'csv')
+    return redirect(url_for('download_project_report', format=format, projectId=project_id))
+
+
+
+@app.route('/api/test-pdf-generation', methods=['GET'])
+def test_pdf_generation():
+    # Sample data for testing
+    data = [
+        {"Project ID": "PRO922", "Project Name": "Sample Project", "Status": "Active"},
+        {"Project ID": "PRO923", "Project Name": "Another Project", "Status": "Completed"}
+    ]
+    
+    # Generate the PDF report
+    response = generate_pdf_report(data, "Project Report")
+    
+    # Return the PDF response
+    return response
+
+
+@app.route('/api/test-csv', methods=['GET'])
+def test_csv():
+    # Sample data for testing
+    data = [
+        {"Project ID": "PRO922", "Project Name": "Sample Project", "Status": "Active"},
+        {"Project ID": "PRO923", "Project Name": "Another Project", "Status": "Completed"}
+    ]
+    return generate_csv_report(data, "project_report")
+
+@app.route('/api/<data_type>-download/<item_id>', methods=['GET'])
+def download_data(data_type, item_id):
+    try:
+        format_type = request.args.get("format", "pdf").lower()
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Choose table and column
+        if data_type == "product":
+            table, column = "products", "product_id"
+        elif data_type == "client":
+            table, column = "clients", "client_id"
+        elif data_type == "project":
+            table, column = "projects", "project_id"
+        else:
+            return jsonify({"error": "Invalid data type"}), 400
+
+        query = f"SELECT * FROM {table} WHERE {column} = %s"
+        cursor.execute(query, (item_id,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        if not result:
+            return jsonify({"error": f"No {data_type} found with ID {item_id}"}), 404
+
+        # Convert result to a list of dictionaries
+        data = []
+        for row in result:
+            # Format dates if present
+            formatted_row = {}
+            for key, value in row.items():
+                if isinstance(value, datetime):
+                    formatted_row[key] = value.strftime('%Y-%m-%d')
+                else:
+                    formatted_row[key] = value
+            data.append(formatted_row)
+
+        # Log the download for statistics
+        log_download(data_type, item_id, format_type, len(data))
+
+        if format_type == "csv":
+            # Use the improved CSV generation
+            return generate_csv_report(data, f"{data_type}_{item_id}")
+        elif format_type == "pdf":
+            # Use the improved PDF generation
+            report_title = f"{data_type.capitalize()} Report - {item_id}"
+            return generate_pdf_report(data, report_title)
+        else:
+            return jsonify({"error": "Invalid format, use 'csv' or 'pdf'"}), 400
+            
+    except Exception as e:
+        logger.error(f"Error in download_data: {str(e)}")
+        traceback.print_exc()  # Log the full traceback for debugging
+        return jsonify({"error": f"Failed to generate {format_type.upper()}: {str(e)}"}), 500
+
+# ================== TASK ROUTES ==================
+
+# Get all tasks
+@app.route('/tasks', methods=['GET'])
+def get_all_tasks():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT 
+                t.task_id as taskId, 
+                t.task_name as taskName, 
+                t.task_description as taskDescription,
+                t.project_id as projectId,
+                t.project_name as projectName,
+                t.product_name as productName,
+                t.client_name as clientName,
+                t.initiative_date as initiativeDate,
+                t.target_completion_date as targetCompletionDate,
+                t.actual_completion_date as actualCompletionDate,
+                t.status
+            FROM tasks t
+            LEFT JOIN projects p ON t.project_id = p.project_id
+        """)
+        
+        tasks = cursor.fetchall()
+        
+        # Format date fields
+        for task in tasks:
+            format_dates(task)
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(tasks)
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get a specific task
+@app.route('/tasks/<task_id>', methods=['GET'])
+def get_task(task_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT 
+                t.task_id as taskId, 
+                t.task_name as taskName, 
+                t.task_description as taskDescription,
+                t.project_id as projectId,
+                t.project_name as projectName,
+                t.product_name as productName,
+                t.client_name as clientName,
+                t.initiative_date as initiativeDate,
+                t.target_completion_date as targetCompletionDate,
+                t.actual_completion_date as actualCompletionDate,
+                t.status
+            FROM tasks t
+            LEFT JOIN projects p ON t.project_id = p.project_id
+            WHERE t.task_id = %s
+        """, (task_id,))
+        
+        task = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if task:
+            # Format date fields
+            format_dates(task)
+            return jsonify(task)
+        else:
+            return jsonify({"error": "Task not found"}), 404
+            
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/tasks', methods=['POST'])
+def create_task():
+    """API endpoint to create a new task in the database"""
+    try:
+        # Get the task data from the request
+        task_data = request.json
+        logger.info(f"Received task data: {task_data}")
+        
+        # Check if all required fields are present
+        required_fields = ['taskId', 'taskName', 'taskDescription', 'projectId', 
+                          'initiativeDate', 'targetCompletionDate']
+        
+        for field in required_fields:
+            if field not in task_data:
+                logger.error(f"Missing required field: {field}")
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+        
+        # Connect to the database
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({"error": "Database connection failed"}), 500
+        
+        cursor = connection.cursor()
+        
+        # Verify if the project exists
+        cursor.execute("SELECT project_id, project_name FROM projects WHERE project_id = %s", 
+                      (task_data['projectId'],))
+        project = cursor.fetchone()
+        
+        if not project:
+            logger.warning(f"Project ID {task_data['projectId']} not found")
+            # For development purposes, let's insert anyway
+            # In production, you might want to return an error
+            # return jsonify({"error": "Project ID not found"}), 404
+        
+        # Insert task into database - map camelCase from frontend to snake_case in database
+        insert_query = """
+        INSERT INTO tasks (
+            task_id, task_name, task_description, project_id, project_name,
+            product_name, client_name, initiative_date,
+            target_completion_date, status
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        values = (
+            task_data['taskId'],
+            task_data['taskName'],
+            task_data['taskDescription'],
+            task_data['projectId'],
+            task_data.get('projectName', None),
+            task_data.get('productName', None),
+            task_data.get('clientName', None),
+            task_data['initiativeDate'],
+            task_data['targetCompletionDate'],
+            'Not Started'  # Default status
+        )
+        
+        cursor.execute(insert_query, values)
+        connection.commit()
+        
+        logger.info(f"Task {task_data['taskId']} created successfully")
+        
+        # Close database connection
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Task created successfully",
+            "taskId": task_data['taskId']
+        }), 201
+        
+    except Error as e:
+        logger.error(f"Database error: {e}")
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+    except Exception as e:
+        logger.error(f"Server error: {e}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# Update a task
+@app.route('/tasks/<task_id>', methods=['PUT'])
+def update_task(task_id):
+    data = request.get_json()
+    
+    # Validate the task data
+    errors = validate_task_data(data)
+    if errors:
+        return jsonify({"error": "Validation failed", "details": errors}), 400
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if task exists
+        cursor.execute("SELECT task_id FROM tasks WHERE task_id = %s", (task_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Task not found"}), 404
+        
+        # Check if project exists
+        cursor.execute("SELECT * FROM projects WHERE project_id = %s", (data['projectId'],))
+        project = cursor.fetchone()
+        
+        if not project:
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Project not found"}), 404
+        
+        # Update the task
+        update_query = """
+            UPDATE tasks SET
+                task_name = %s,
+                task_description = %s,
+                project_id = %s,
+                project_name = %s,
+                product_name = %s,
+                client_name = %s,
+                initiative_date = %s,
+                target_completion_date = %s
+            WHERE task_id = %s
+        """
+        
+        cursor.execute(update_query, (
+            data['taskName'],
+            data['taskDescription'],
+            data['projectId'],
+            data.get('projectName', project.get('project_name')),
+            data.get('productName', project.get('product_name')),
+            data.get('clientName', project.get('client_name')),
+            data['initiativeDate'],
+            data['targetCompletionDate'],
+            task_id
+        ))
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"message": "Task updated successfully"})
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+
+# Delete a task
+@app.route('/tasks/<task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if task exists
+        cursor.execute("SELECT task_id FROM tasks WHERE task_id = %s", (task_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Task not found"}), 404
+        
+        # Delete the task
+        cursor.execute("DELETE FROM tasks WHERE task_id = %s", (task_id,))
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"message": "Task deleted successfully"})
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+
+# Update task status
+@app.route('/update_task_status', methods=['POST'])
+def update_task_status():
+    data = request.get_json()
+    print(f"Received data: {data}")  # Log the incoming data to inspect
+
+    # Check if data is None
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+
+    task_id = data.get('taskId')
+    task_status = data.get('taskStatus')
+    reason = data.get('reason')
+    allocate_by = data.get('allocateBy')
+    employee_id = data.get('employeeId')
+    assigned_date = data.get('assignedDate')
+    target_date = data.get('targetDate')
+
+    # Validate required fields
+    if not task_id or not task_status or not reason:
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+
+    # Parse dates if provided
+    try:
+        # Handle DD-MM-YYYY format
+        if assigned_date:
+            try:
+                # Try to parse as DD-MM-YYYY
+                day, month, year = assigned_date.split('-')
+                assigned_date = f"{year}-{month}-{day}"  # Convert to YYYY-MM-DD for MySQL
+            except ValueError:
+                # If not in DD-MM-YYYY format, try to use as is (might be already in ISO format)
+                pass
+                
+        if target_date:
+            try:
+                # Try to parse as DD-MM-YYYY
+                day, month, year = target_date.split('-')
+                target_date = f"{year}-{month}-{day}"  # Convert to YYYY-MM-DD for MySQL
+            except ValueError:
+                # If not in DD-MM-YYYY format, try to use as is (might be already in ISO format)
+                pass
+    except Exception as e:
+        print(f"Date parsing error: {e}")
+        return jsonify({'success': False, 'message': f'Invalid datetime format: {str(e)}'}), 400
+
+    try:
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'success': False, 'message': 'Database connection failed'}), 500
+            
+        cursor = connection.cursor()
+
+        # Get task_name from tasks table, ensure task_name exists
+        cursor.execute("SELECT task_name FROM tasks WHERE task_id = %s", (task_id,))
+        row = cursor.fetchone()
+
+        if not row or not row[0]:
+            task_name = "Unknown Task"  # Set default value if task_name is missing
+        else:
+            task_name = row[0]
+
+        # Check if task already exists in task_update
+        cursor.execute("SELECT COUNT(1) FROM task_update WHERE task_id = %s", (task_id,))
+        exists = cursor.fetchone()[0]
+
+        if exists:
+            # Update task status if exists
+            query = """
+                UPDATE task_update
+                SET task_status = %s,
+                    reason = %s,
+                    allocate_by = %s,
+                    employee_id = %s,
+                    assigned_date = %s,
+                    target_date = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE task_id = %s
+            """
+            cursor.execute(query, (task_status, reason, allocate_by, employee_id, assigned_date, target_date, task_id))
+        else:
+            # Insert new task status if not exists
+            query = """
+                INSERT INTO task_update (
+                    task_id, task_name, task_status, reason,
+                    allocate_by, employee_id, assigned_date, target_date
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (
+                task_id, task_name, task_status, reason,
+                allocate_by, employee_id, assigned_date, target_date
+            ))
+
+        # Commit changes to the database
+        connection.commit()
+        
+        cursor.close()
+        connection.close()
+
+        return jsonify({'success': True, 'message': 'Task status saved'}), 200
+
+    except mysql.connector.Error as e:
+        print(f"MySQL error: {e}")
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'connection' in locals() and connection.is_connected():
+            connection.close()
+        return jsonify({'success': False, 'message': f"Database error: {str(e)}"}), 500
+    except Exception as e:
+        print(f"General error: {e}")
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'connection' in locals() and connection.is_connected():
+            connection.close()
+        return jsonify({'success': False, 'message': f"An error occurred: {str(e)}"}), 500
+
+# Get tasks for a specific project
+@app.route('/projects/<project_id>/tasks', methods=['GET'])
+def get_project_tasks(project_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if project exists
+        cursor.execute("SELECT project_id FROM projects WHERE project_id = %s", (project_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Project not found"}), 404
+        
+        cursor.execute("""
+            SELECT 
+                task_id as taskId, 
+                task_name as taskName, 
+                task_description as taskDescription,
+                project_name as projectName,
+                initiative_date as initiativeDate,
+                target_completion_date as targetCompletionDate,
+                actual_completion_date as actualCompletionDate,
+                status
+            FROM tasks
+            WHERE project_id = %s
+        """, (project_id,))
+        
+        tasks = cursor.fetchall()
+        
+        # Format date fields
+        for task in tasks:
+            format_dates(task)
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(tasks)
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+    
+    
+@app.route('/api/task-allocation', methods=['GET'])
+def get_task_allocations():
+    """Get all task allocations with optional filtering"""
+    try:
+        # Extract query parameters for filtering
+        employee_id = request.args.get('employee_id')
+        project_name = request.args.get('project_name')
+        product_name = request.args.get('product_name')
+        client_name = request.args.get('client_name')
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Base query
+        query = "SELECT * FROM task_allocation WHERE 1=1"
+        params = []
+        
+        # Add filters if provided
+        if employee_id:
+            query += " AND employee_id = %s"
+            params.append(employee_id)
+        
+        if project_name:
+            query += " AND project_name = %s"
+            params.append(project_name)
+            
+        if product_name:
+            query += " AND product_name = %s"
+            params.append(product_name)
+            
+        if client_name:
+            query += " AND client_name = %s"
+            params.append(client_name)
+        
+        # Add ordering
+        query += " ORDER BY created_at DESC"
+        
+        cursor.execute(query, params)
+        tasks = cursor.fetchall()
+        
+        # Convert dates to string format for JSON serialization
+        for task in tasks:
+            for key, value in task.items():
+                if isinstance(value, datetime):
+                    task[key] = value.isoformat()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(tasks), 200
+        
+    except Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+@app.route('/get_task_allocation/<task_id>', methods=['GET'])
+def get_task_allocation(task_id):
+    try:
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'success': False, 'error': 'Database connection failed'}), 500
+
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch from task_allocation
+        cursor.execute("""
+            SELECT task_name, employee_name, employee_id, assigned_date, target_date
+            FROM task_allocation
+            WHERE task_id = %s
+        """, (task_id,))
+        task = cursor.fetchone()
+
+        if not task:
+            return jsonify({'success': False, 'message': 'Task not found'}), 404
+
+        # Convert date fields to strings if necessary
+        task['assigned_date'] = task['assigned_date'].strftime('%Y-%m-%d') if task['assigned_date'] else None
+        task['target_date'] = task['target_date'].strftime('%Y-%m-%d') if task['target_date'] else None
+
+        return jsonify({'success': True, 'taskDetails': task})
+    
+    except Exception as e:
+        print(f"Error retrieving task allocation: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'connection' in locals() and connection.is_connected():
+            connection.close()
+
+@app.route('/api/task-allocation/<task_id>', methods=['PUT'])
+def update_task_allocation(task_id):
+    """Update an existing task allocation"""
+    try:
+        data = request.json
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        # First, check if the task exists
+        cursor.execute("SELECT 1 FROM task_allocation WHERE task_id = %s", (task_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Task allocation not found'}), 404
+        
+        # Prepare update query
+        query = "UPDATE task_allocation SET "
+        params = []
+        
+        # Add fields to update
+        fields = [
+            'task_name', 'project_name', 'product_name', 'client_name',
+            'initiative_date', 'target_completion_date', 'employee_id',
+            'assigned_date', 'target_date', 'remarks', 'employee_name', 'role_name'
+        ]
+        
+        update_parts = []
+        
+        for field in fields:
+            if field in data:
+                # Format dates
+                if field.endswith('_date') and data[field]:
+                    try:
+                        data[field] = datetime.strptime(data[field], '%Y-%m-%d').date()
+                    except ValueError:
+                        return jsonify({'error': f'Invalid date format for {field}. Use YYYY-MM-DD'}), 400
+                
+                update_parts.append(f"{field} = %s")
+                params.append(data[field])
+        
+        if not update_parts:
+            return jsonify({'message': 'No fields to update'}), 200
+        
+        query += ", ".join(update_parts)
+        query += " WHERE task_id = %s"
+        params.append(task_id)
+        
+        cursor.execute(query, params)
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Task allocation updated successfully'}), 200
+        
+    except Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+@app.route('/api/task-allocation/<task_id>', methods=['DELETE'])
+def delete_task_allocation(task_id):
+    """Delete a task allocation"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        # Check if task exists
+        cursor.execute("SELECT 1 FROM task_allocation WHERE task_id = %s", (task_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Task allocation not found'}), 404
+        
+        # Delete the task
+        cursor.execute("DELETE FROM task_allocation WHERE task_id = %s", (task_id,))
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Task allocation deleted successfully'}), 200
+        
+    except Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+    
+    
+
+# Helper function to handle date formatting
+def format_date_for_db(date_str):
+    """Process date in DD-MM-YYYY format and return as is for MySQL"""
+    if not date_str:
+        return None
+    try:
+        # Validate the date format (DD-MM-YYYY)
+        day, month, year = date_str.split('-')
+        # Return the date in the same format (DD-MM-YYYY) as MySQL is configured to accept it
+        return date_str
+    except Exception as e:
+        print(f"Error processing date format: {e}")
+        return None
+
+@app.route('/allocate_task', methods=['POST'])
+def allocate_task():
+    """Handle task allocation to an employee"""
+    try:
+        # Get request data
+        data = request.json
+        print(f"Received allocation request: {data}")
+        
+        # Check required fields
+        required_fields = [
+            'taskId', 'employeeId', 'employeeName', 'roleName',
+            'assignedDate', 'targetDate', 'reportingPersonId'
+        ]
+        
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Connect to DB
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = connection.cursor()
+
+        task_id = data['taskId']
+
+        # Check if task already allocated
+        cursor.execute("SELECT * FROM task_allocation WHERE task_id = %s", (task_id,))
+        existing_task = cursor.fetchone()
+
+        # Prepare dates
+        assigned_date = sanitize_date_field(data['assignedDate'])
+        target_date = sanitize_date_field(data['targetDate'])
+        initiative_date = sanitize_date_field(data.get('initiativeDate'))
+        target_completion_date = sanitize_date_field(data.get('targetCompletionDate'))
+
+        # Get task details if needed
+        cursor.execute("SELECT * FROM tasks WHERE task_id = %s", (task_id,))
+        task_details = cursor.fetchone()
+
+        # Use defaults if necessary
+        task_name = data.get('taskName', "Unknown Task")
+        project_name = data.get('projectName', "Unknown Project")
+        product_name = data.get('productName', "Unknown Product")
+        client_name = data.get('clientName', "Unknown Client")
+
+        if task_details:
+            task_name = task_details[1] or task_name
+            project_name = task_details[3] or project_name
+            product_name = task_details[4] or product_name
+            client_name = task_details[5] or client_name
+            initiative_date = sanitize_date_field(task_details[6]) or initiative_date
+            target_completion_date = sanitize_date_field(task_details[7]) or target_completion_date
+
+        # Update or Insert
+        if existing_task:
+            update_query = """
+                UPDATE task_allocation 
+                SET employee_id = %s,
+                    employee_name = %s,
+                    role_name = %s,
+                    reporting_person_id = %s,
+                    assigned_date = %s,
+                    target_date = %s,
+                    remarks = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE task_id = %s
+            """
+            cursor.execute(update_query, (
+                data['employeeId'],
+                data['employeeName'],
+                data['roleName'],
+                data['reportingPersonId'],
+                assigned_date,
+                target_date,
+                data.get('remarks', ''),
+                task_id
+            ))
+            action = 'updated'
+        else:
+            insert_query = """
+                INSERT INTO task_allocation (
+                    task_id, task_name, project_name, product_name, client_name,
+                    initiative_date, target_completion_date,
+                    employee_id, employee_name, role_name,
+                    reporting_person_id, assigned_date, target_date, remarks
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (
+                task_id,
+                task_name,
+                project_name,
+                product_name,
+                client_name,
+                initiative_date,
+                target_completion_date,
+                data['employeeId'],
+                data['employeeName'],
+                data['roleName'],
+                data['reportingPersonId'],
+                assigned_date,
+                target_date,
+                data.get('remarks', '')
+            ))
+            action = 'created'
+
+        connection.commit()
+        return jsonify({
+            'success': True,
+            'message': f'Task allocation {action} successfully',
+            'taskId': task_id,
+            'employeeId': data['employeeId']
+        })
+
+    except Exception as e:
+        print(f"Error processing request: {e}")
+        return jsonify({'error': f'Error processing request: {str(e)}'}), 500
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+            
+            
+
+if __name__ == "__main__":
+    app.run(debug=True)

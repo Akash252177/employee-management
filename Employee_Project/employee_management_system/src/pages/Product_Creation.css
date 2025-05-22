@@ -1,0 +1,803 @@
+/* Product_Creation.css - Aligned with animation patterns */
+
+/* Main container styling */
+.product-form-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  animation: fadeIn 0.4s ease-out;
+  will-change: opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Loading container */
+.product-form-loading-container {
+  padding: 24px;
+}
+
+.product-form-breadcrumb-skeleton,
+.product-form-header-skeleton {
+  margin-bottom: 20px;
+}
+
+/* Breadcrumb styling */
+.product-form-page-breadcrumb {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  animation: slideInDown 0.5s ease;
+}
+
+.product-form-page-breadcrumb .ant-breadcrumb {
+  font-size: 14px;
+}
+
+.product-form-page-breadcrumb .ant-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.product-form-page-breadcrumb .anticon {
+  margin-right: 5px;
+  font-size: 15px;
+}
+
+/* Custom header styling */
+.product-form-status-header {
+  background: #e6f7ff;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Animation removed */
+
+.product-form-status-header:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.product-form-header-icon {
+  font-size: 28px;
+  color: #1890ff;
+  margin-right: 16px;
+  /* Animation removed */
+}
+
+/* Animation keyframes removed */
+
+.product-form-header-text {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Success notification */
+.product-form-success-notification {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-left: 4px solid #52c41a;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  animation: success-slide-in 0.5s ease;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  position: relative;
+}
+
+.product-form-success-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  background-color: #52c41a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.product-form-success-icon {
+  color: white;
+  font-size: 14px;
+}
+
+@keyframes success-slide-in {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Info banner styling */
+.product-form-info-banner {
+  background-color: #f0f7ff;
+  border: 1px solid #bae0ff;
+  border-left: 4px solid #1890ff;
+  border-radius: 8px;
+  padding: 18px 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.05);
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.product-form-info-banner:hover {
+  border-color: #91caff;
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.08);
+  transform: translateY(-3px);
+}
+
+.product-form-info-banner-icon {
+  font-size: 26px;
+  color: #1890ff;
+  margin-right: 18px;
+  transition: transform 0.3s ease;
+}
+
+.product-form-info-banner:hover .product-form-info-banner-icon {
+  transform: scale(1.1);
+}
+
+.product-form-info-banner-title {
+  font-size: 17px;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 6px;
+}
+
+.product-form-info-banner-description {
+  font-size: 14px;
+  color: #595959;
+  line-height: 1.5;
+}
+
+/* Card styling */
+.product-form-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  animation: slideInUp 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  padding: 0;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.product-form-card:hover {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+}
+
+/* Form styling */
+.product-form {
+  padding: 24px;
+  animation: fadeIn 0.5s ease-out 0.2s backwards;
+}
+
+.product-form-item {
+  margin-bottom: 20px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Form label styling */
+.product-form-label {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.product-form-label .anticon {
+  margin-right: 8px;
+  color: #1890ff;
+  font-size: 16px;
+}
+
+/* Add underline animation on hover */
+.product-form-label:after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #1890ff;
+  transition: width 0.3s ease;
+}
+
+.product-form-item:hover .product-form-label:after {
+  width: 30px;
+}
+
+.product-form-item:hover .product-form-label {
+  color: #1890ff;
+}
+
+.product-form-tooltip-icon {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin-left: 6px;
+  cursor: help;
+  transition: all 0.3s;
+}
+
+.product-form-tooltip-icon:hover {
+  color: #1890ff;
+  transform: scale(1.2);
+}
+
+/* Form inputs styling */
+.product-form-custom-input, 
+.product-form-custom-select .ant-select-selector {
+  height: 44px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  will-change: border-color, box-shadow;
+  transform: translateZ(0);
+}
+
+/* Adjust form error message position */
+.ant-form-item-explain {
+  padding-top: 6px;
+  margin-bottom: 5px;
+}
+
+/* Medium size textarea */
+.product-form-medium-textarea {
+  height: auto !important;
+  resize: vertical !important;
+  min-height: 120px !important;
+  max-height: 200px !important;
+  padding: 10px 14px !important;
+  transform: translateZ(0);
+  border-radius: 8px !important;
+}
+
+.product-form-custom-input:hover:not(.product-form-disabled-input),
+.product-form-medium-textarea:hover {
+  border-color: #40a9ff;
+  box-shadow: none !important;
+}
+
+.product-form-custom-select:hover .ant-select-selector {
+  border-color: #40a9ff !important;
+}
+
+.product-form-custom-input:focus,
+.product-form-medium-textarea:focus {
+  border-color: #1890ff !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
+}
+
+.product-form-custom-select.ant-select-focused .ant-select-selector {
+  border-color: #1890ff !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
+}
+
+.product-form-custom-select .ant-select-selection-item {
+  line-height: 44px;
+}
+
+.product-form-disabled-input {
+  background-color: #f9f9f9;
+  color: rgba(0, 0, 0, 0.65);
+  cursor: not-allowed;
+}
+
+/* Section divider */
+.product-form-section-divider {
+  margin: 32px 0;
+  border-top: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.product-form-section-divider:after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, #1890ff, #40a9ff);
+  border-radius: 2px;
+  animation: dividerGrow 1s ease-in-out forwards;
+}
+
+@keyframes dividerGrow {
+  from { width: 0; }
+  to { width: 80px; }
+}
+
+/* Field helper text */
+.product-form-helper-text {
+  margin-top: -15px;
+  margin-bottom: 15px;
+  color: #8c8c8c;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+}
+
+.product-form-helper-icon {
+  margin-right: 6px;
+  font-size: 14px;
+  color: #1890ff;
+}
+
+.product-form-framework-helper {
+  margin-top: 5px;
+}
+  
+/* Technical section intro */
+.product-form-technical-section-intro {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  animation: fadeIn 0.6s ease-out 0.2s backwards;
+  transition: all 0.3s ease;
+}
+
+.product-form-technical-section-intro:hover {
+  background-color: #f0f7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+  
+.product-form-tech-intro-icon {
+  font-size: 20px;
+  color: #faad14;
+  margin-right: 12px;
+  transition: transform 0.3s ease;
+}
+
+.product-form-technical-section-intro:hover .product-form-tech-intro-icon {
+  transform: scale(1.1);
+}
+
+/* Tag styling in selects */
+.ant-select-selection-item .ant-tag {
+  margin-right: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.ant-select-selection-item .ant-tag:hover {
+  transform: scale(1.05);
+}
+
+/* Button styling */
+.product-form-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+  gap: 16px;
+  animation: actionButtonsAppear 1s ease-out;
+}
+
+@keyframes actionButtonsAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+  
+.product-form-save-button,
+.product-form-reset-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  will-change: transform, box-shadow;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-form-save-button {
+  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  color: white;
+}
+
+.product-form-save-button:hover {
+  background: linear-gradient(135deg, #0c7ad8, #1890ff);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.25);
+}
+
+.product-form-reset-button {
+  background: white;
+  color: rgba(0, 0, 0, 0.65);
+  border: 1px solid #d9d9d9;
+}
+
+.product-form-reset-button:hover, 
+.product-form-reset-button:focus {
+  color: #40a9ff;
+  border-color: #40a9ff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-form-reset-button:active {
+  transform: translateY(-1px);
+}
+
+/* Footer styling */
+.product-form-page-footer {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-top: 24px;
+  animation: fadeIn 0.6s ease-out 0.5s backwards;
+}
+
+.product-form-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-form-footer-left {
+  color: #595959;
+  font-size: 14px;
+}
+
+.product-form-help-button {
+  color: #1890ff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.product-form-help-button:hover {
+  color: #40a9ff;
+  background-color: rgba(24, 144, 255, 0.1);
+  transform: scale(1.05);
+}
+
+/* Section styling */
+.product-form-role-info-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  animation: fadeInLeft 0.5s ease-out;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.product-form-role-info-header::after {
+  content: "";
+  display: none;
+}
+
+.product-form-role-icon {
+  width: 36px;
+  height: 36px;
+  background-color: #f0f7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  transition: all 0.3s;
+}
+
+.product-form-role-icon .anticon {
+  color: #1890ff;
+  font-size: 20px;
+}
+
+.product-form-card:hover .product-form-role-icon {
+  background-color: #e6f7ff;
+  transform: translateY(-2px);
+}
+
+.product-form-role-info-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #1890ff;
+}
+
+/* Select dropdown styling */
+.product-form-select-icon {
+  color: #bfbfbf;
+  transition: all 0.3s;
+}
+
+.product-form-custom-select:hover .product-form-select-icon {
+  color: #40a9ff;
+}
+
+.product-form-custom-select.ant-select-focused .product-form-select-icon {
+  color: #1890ff;
+  transform: rotate(180deg);
+}
+
+/* Improve dropdown scrolling */
+.ant-select-dropdown {
+  will-change: transform;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ant-select-item {
+  padding: 8px 12px !important;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.ant-select-item:hover {
+  transform: translateX(2px);
+}
+
+.ant-select-item-option-selected {
+  font-weight: 500 !important;
+}
+
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: #f0f7ff !important;
+}
+
+/* Loading icon */
+.product-form-loading-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Animation classes */
+.success-message-animation {
+  animation: slideInRight 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.error-message-animation {
+  animation: error-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes slideInRight {
+  from { 
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-form-container {
+    padding: 16px;
+  }
+
+  .product-form-button-container {
+    flex-direction: column-reverse;
+  }
+  
+  .product-form-save-button, .product-form-reset-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .product-form-status-header {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .product-form-header-icon {
+    margin-bottom: 12px;
+  }
+  
+  .product-form-info-banner {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-form-info-banner-icon {
+    margin-bottom: 12px;
+  }
+
+  .product-form-technical-section-intro {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .product-form-tech-intro-icon {
+    margin-bottom: 8px;
+  }
+}
+
+/* Smooth scrolling */
+html, body {
+  scroll-behavior: smooth;
+}
+
+/* High-performance rendering for all elements */
+* {
+  text-rendering: optimizeSpeed;
+}
+
+/* Performance optimizations for specific elements */
+.product-form-container,
+.product-form-card,
+.product-form-role-info-header,
+.ant-select-dropdown,
+.product-form-label,
+.product-form-button-container {
+  transform: translateZ(0);
+}
+
+/* Optimize large form rendering */
+.ant-form-item {
+  margin-bottom: 20px;
+  contain: layout style;
+}
+
+/* Remove all outlines from inputs, buttons, and form controls */
+.product-form-container input,
+.product-form-container button,
+.product-form-container .ant-input,
+.product-form-container .ant-btn,
+.product-form-container .ant-select-selector,
+.product-form-container .ant-select-dropdown,
+.product-form-container .ant-picker,
+.product-form-container textarea,
+.product-form-container .ant-input-affix-wrapper,
+.product-form-save-button,
+.product-form-reset-button,
+.product-form-custom-input,
+.product-form-date-picker,
+.product-form-medium-textarea,
+.product-form-custom-select .ant-select-selector,
+.product-form-help-button {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove outlines on focus and focus-visible states */
+.product-form-container input:focus,
+.product-form-container button:focus,
+.product-form-container .ant-input:focus,
+.product-form-container .ant-btn:focus,
+.product-form-container .ant-select-selector:focus,
+.product-form-container .ant-picker:focus,
+.product-form-container textarea:focus,
+.product-form-container .ant-input-affix-wrapper:focus,
+.product-form-save-button:focus,
+.product-form-reset-button:focus,
+.product-form-custom-input:focus,
+.product-form-date-picker:focus,
+.product-form-medium-textarea:focus,
+.product-form-custom-select .ant-select-selector:focus,
+.product-form-help-button:focus,
+.product-form-container input:focus-visible,
+.product-form-container button:focus-visible,
+.product-form-container .ant-input:focus-visible,
+.product-form-container .ant-btn:focus-visible,
+.product-form-container .ant-select-selector:focus-visible,
+.product-form-container .ant-picker:focus-visible,
+.product-form-container textarea:focus-visible,
+.product-form-container .ant-input-affix-wrapper:focus-visible,
+.product-form-save-button:focus-visible,
+.product-form-reset-button:focus-visible,
+.product-form-custom-input:focus-visible,
+.product-form-date-picker:focus-visible,
+.product-form-medium-textarea:focus-visible,
+.product-form-custom-select .ant-select-selector:focus-visible,
+.product-form-help-button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Override Ant Design defaults for focus states */
+.product-form-container .ant-select-focused .ant-select-selector,
+.product-form-container .ant-input-focused,
+.product-form-container .ant-input-affix-wrapper-focused,
+.product-form-container .ant-picker-focused {
+  outline: none !important;
+  box-shadow: none !important;
+}

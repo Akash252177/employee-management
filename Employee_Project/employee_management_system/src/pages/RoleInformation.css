@@ -1,0 +1,285 @@
+/* Modern styling for RoleInformation page */
+.role-card.modern-card {
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.card-title .anticon {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.role-card-banner {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.banner-icon {
+  font-size: 24px;
+  margin-right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.banner-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.banner-description {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.form-section {
+  margin-bottom: 32px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #f0f0f0;
+}
+
+.form-section-header {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.form-section-header .anticon {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -12px;
+}
+
+.form-col {
+  flex: 1;
+  padding: 0 12px;
+  min-width: 250px;
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-label .anticon {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.required-mark {
+  color: #ff4d4f;
+  margin-left: 4px;
+}
+
+.enhanced-select, .enhanced-input {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s;
+}
+
+.enhanced-select:hover, .enhanced-input:hover {
+  border-color: #40a9ff;
+}
+
+.field-helper-text {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.action-section {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modern-button {
+  border-radius: 6px;
+  height: 40px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+}
+
+.modern-button .anticon {
+  margin-right: 8px;
+}
+
+.api-info-section {
+  margin-top: 32px;
+  background-color: #f6f8fa;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px dashed #d9d9d9;
+}
+
+.api-info-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #262626;
+  display: flex;
+  align-items: center;
+}
+
+.api-info-title .anticon {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.api-endpoints-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.api-endpoint {
+  display: flex;
+  align-items: center;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.http-method {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  min-width: 40px;
+}
+
+.http-method.get {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.http-method.post {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.http-method.put {
+  background-color: #fff7e6;
+  color: #fa8c16;
+}
+
+.endpoint-path {
+  color: #595959;
+}
+
+.dropdown-header {
+  padding: 8px;
+  color: #1890ff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Status styles */
+.status-option {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.status-description {
+  margin-left: 8px;
+  color: #595959;
+}
+
+/* Page header styles */
+.page-header-container {
+  margin-bottom: 24px;
+}
+
+.page-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-icon-container {
+  background-color: #1890ff;
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  font-size: 24px;
+}
+
+.header-text-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.page-description {
+  color: #8c8c8c;
+  margin: 4px 0 0 0;
+}
+
+/* Footer styles */
+.page-footer {
+  margin-top: 40px;
+  padding: 16px 0;
+  border-top: 1px solid #f0f0f0;
+  color: #8c8c8c;
+}

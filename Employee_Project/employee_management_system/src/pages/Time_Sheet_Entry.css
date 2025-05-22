@@ -1,0 +1,703 @@
+.timesheet-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.timesheet-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.timesheet-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.timesheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.timesheet-title-icon {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.timesheet-form {
+  margin-top: 24px;
+}
+
+.timesheet-full-width {
+  width: 100%;
+}
+
+/* Success badge styling */
+.timesheet-success-badge {
+  background: linear-gradient(to right, #52c41a, #73d13d);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  animation: fadeInSlide 0.5s;
+  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.25);
+}
+
+.timesheet-success-badge svg {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* Form styling */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* Enhanced Form Actions */
+.timesheet-form-actions {
+  margin-top: 32px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 24px;
+}
+
+.timesheet-button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.timesheet-reset-button {
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  background: #f5f5f5;
+  color: rgba(0, 0, 0, 0.65);
+  transition: all 0.3s;
+  min-width: 100px;
+}
+
+.timesheet-reset-button:hover {
+  background: #fafafa;
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.timesheet-submit-button {
+  min-width: 160px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  background: linear-gradient(to right, #1890ff, #40a9ff);
+  border: none;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.25);
+  transition: all 0.3s;
+  border-radius: 8px;
+}
+
+.timesheet-submit-button:hover {
+  background: linear-gradient(to right, #40a9ff, #69c0ff);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.35);
+}
+
+.timesheet-submit-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(24, 144, 255, 0.25);
+}
+
+/* Readonly styling */
+.timesheet-readonly-input {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* Task sections common styling - enhanced */
+.timesheet-available-tasks-section,
+.timesheet-assigned-tasks-section,
+.timesheet-misc-tasks-section {
+  margin-top: 28px;
+  margin-bottom: 28px;
+  padding: 22px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.timesheet-available-tasks-section:hover,
+.timesheet-assigned-tasks-section:hover,
+.timesheet-misc-tasks-section:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Section pattern overlay */
+.timesheet-available-tasks-section::before,
+.timesheet-assigned-tasks-section::before,
+.timesheet-misc-tasks-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  opacity: 0.05;
+  z-index: 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Available Tasks section */
+.timesheet-available-tasks-section {
+  background-color: #f0f7ff;
+  border: 1px solid #bae0ff;
+  border-left: 4px solid #1890ff;
+}
+
+.timesheet-available-tasks-section::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231890ff'%3E%3Cpath d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z'/%3E%3C/svg%3E");
+}
+
+/* Assigned Tasks section */
+.timesheet-assigned-tasks-section {
+  background-color: #f0f7ff;
+  border: 1px solid #d6e8ff;
+  border-left: 4px solid #40a9ff;
+}
+
+.timesheet-assigned-tasks-section::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2340a9ff'%3E%3Cpath d='M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.49 10 10-4.49 10-10 10zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8zm3.88 11.12L12 16.24l-3.88-2.88.88-1.2L12 14.76l3-2.4.88 1.2z'/%3E%3C/svg%3E");
+}
+
+/* Miscellaneous Tasks section */
+.timesheet-misc-tasks-section {
+  background-color: #fffbf0;
+  border: 1px solid #ffe58f;
+  border-left: 4px solid #faad14;
+}
+
+.timesheet-misc-tasks-section::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23faad14'%3E%3Cpath d='M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 15h2v-6h-2v6zm0-8h2V8h-2v2z'/%3E%3C/svg%3E");
+}
+
+/* Section headers - enhanced */
+.timesheet-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.timesheet-section-icon {
+  color: #1890ff;
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.timesheet-section-title {
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.timesheet-employee-name {
+  font-size: 15px;
+  font-weight: normal;
+  color: #555;
+  font-style: italic;
+  margin-left: 8px;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Table container styling - enhanced */
+.timesheet-table-container {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  margin-top: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+/* Tables styling - enhanced */
+.timesheet-available-tasks-table,
+.timesheet-assigned-tasks-table,
+.timesheet-misc-tasks-table {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.timesheet-available-tasks-table .ant-table-thead > tr > th,
+.timesheet-assigned-tasks-table .ant-table-thead > tr > th,
+.timesheet-misc-tasks-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  padding: 14px 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Striped rows - enhanced */
+.timesheet-even-row {
+  background-color: #fff !important;
+}
+
+.timesheet-odd-row {
+  background-color: #f9fafe !important;
+}
+
+.timesheet-misc-tasks-table .timesheet-odd-row {
+  background-color: #fffcf2 !important;
+}
+
+/* Tables hover effects - enhanced */
+.timesheet-available-tasks-table .ant-table-tbody > tr:hover > td,
+.timesheet-assigned-tasks-table .ant-table-tbody > tr:hover > td {
+  background-color: #e6f4ff !important;
+}
+
+.timesheet-misc-tasks-table .ant-table-tbody > tr:hover > td {
+  background-color: #fff9e6 !important;
+}
+
+/* Enhanced Task Input Form */
+.timesheet-misc-task-input-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #ffe58f;
+  background-color: #fffdf6;
+  overflow: hidden;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.timesheet-misc-task-input-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.timesheet-task-input {
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.timesheet-task-input:hover {
+  border-color: #faad14;
+}
+
+.timesheet-task-input:focus,
+.timesheet-task-input-focused {
+  border-color: #faad14 !important;
+  box-shadow: 0 0 0 2px rgba(250, 173, 20, 0.2) !important;
+}
+
+.timesheet-input-icon {
+  color: #faad14;
+}
+
+.timesheet-task-hours-input {
+  border-radius: 8px;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.timesheet-task-hours-input:hover {
+  border-color: #faad14;
+}
+
+.timesheet-task-hours-input:focus,
+.timesheet-task-hours-input-focused {
+  border-color: #faad14 !important;
+  box-shadow: 0 0 0 2px rgba(250, 173, 20, 0.2) !important;
+}
+
+.timesheet-add-task-btn {
+  background: linear-gradient(to right, #faad14, #ffc53d);
+  border: none;
+  box-shadow: 0 2px 6px rgba(250, 173, 20, 0.25);
+  height: 40px;
+}
+
+.timesheet-add-task-btn:hover {
+  background: linear-gradient(to right, #ffc53d, #ffd666);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(250, 173, 20, 0.35);
+}
+
+.timesheet-add-task-btn:disabled {
+  background: #f5f5f5;
+  color: rgba(0, 0, 0, 0.25);
+  box-shadow: none;
+}
+
+.timesheet-misc-task-form {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.timesheet-misc-task-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timesheet-misc-task-field label {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 4px;
+}
+
+.timesheet-desc-field {
+  flex: 1 1 400px;
+}
+
+.timesheet-hours-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px; /* Match Ant Design input height */
+}
+
+.timesheet-hours-field {
+  flex: 0 0 110px;
+}
+
+.timesheet-remarks-field {
+  flex: 1 1 200px;
+}
+
+.timesheet-add-btn-field {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Action buttons - enhanced */
+.timesheet-add-task-button,
+.timesheet-action-button {
+  margin-top: 4px;
+  height: 40px;
+  font-weight: 500;
+  transition: all 0.3s;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+}
+
+.timesheet-add-task-button:hover,
+.timesheet-action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+}
+
+.timesheet-delete-button {
+  transition: all 0.3s;
+  border-radius: 4px;
+}
+
+.timesheet-delete-button:hover {
+  color: #ff4d4f;
+  background-color: #fff1f0;
+}
+
+/* Cell styling - enhanced */
+.timesheet-serial-number {
+  font-weight: 600;
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+  min-width: 28px;
+  text-align: center;
+}
+
+.timesheet-task-name {
+  font-weight: 500;
+}
+
+.timesheet-date-cell {
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.timesheet-date-icon {
+  margin-right: 6px;
+}
+
+.timesheet-status-tag {
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+/* Task count tag - enhanced */
+.timesheet-task-count-tag {
+  font-size: 14px;
+  padding: 4px 12px;
+  height: auto;
+  border-radius: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+}
+
+/* Empty state alert - enhanced */
+.timesheet-empty-tasks-alert {
+  margin-top: 16px;
+  border-radius: 8px;
+}
+
+.timesheet-empty-tasks-alert .ant-alert-message {
+  font-weight: 500;
+}
+
+.timesheet-empty-tasks-alert .ant-alert-description p {
+  margin-bottom: 8px;
+}
+
+/* Table summary row - enhanced */
+.timesheet-summary-cell {
+  padding: 12px 16px !important;
+  font-weight: 500;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fafafa;
+}
+
+.timesheet-hours-summary-cell {
+  text-align: right;
+  padding-right: 25px !important;
+  font-weight: 600;
+}
+
+/* Hours Summary Section - enhanced */
+.timesheet-hours-summary {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.timesheet-hours-summary .ant-alert {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Input fields inside tables - enhanced */
+.timesheet-hours-input,
+.timesheet-remarks-input {
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.timesheet-hours-input:hover,
+.timesheet-remarks-input:hover {
+  border-color: #40a9ff;
+}
+
+.timesheet-hours-input:focus,
+.timesheet-remarks-input:focus {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Enhanced Time Picker Styling */
+.timesheet-time-picker {
+  position: relative;
+  overflow: hidden;
+}
+
+.timesheet-time-icon {
+  color: #1890ff;
+}
+
+.timesheet-time-popup .ant-picker-time-panel-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timesheet-time-popup .ant-picker-time-panel-column::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.timesheet-time-popup .ant-picker-time-panel-column::-webkit-scrollbar-thumb {
+  background-color: #bfbfbf;
+  border-radius: 3px;
+}
+
+.timesheet-time-popup .ant-picker-time-panel-column::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+.timesheet-time-hint {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: -12px;
+  margin-bottom: 16px;
+  margin-left: 2px;
+}
+
+/* Improved Hours Input */
+.timesheet-hours-input {
+  font-weight: 500;
+}
+
+.timesheet-hours-input .ant-input-number-input {
+  text-align: center;
+  font-size: 15px;
+}
+
+.timesheet-hours-input .ant-input-number-handler-wrap {
+  background-color: #f9f9f9;
+}
+
+/* Time Animations */
+.timesheet-time-picker::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(to right, #1890ff, #40a9ff);
+  transition: width 0.3s ease;
+  z-index: 1;
+}
+
+.timesheet-time-picker:focus-within::before {
+  width: 100%;
+}
+
+/* Form utils */
+.timesheet-no-bottom-margin {
+  margin-bottom: 0 !important;
+}
+
+.timesheet-text-secondary {
+  color: #bfbfbf;
+}
+
+/* Help icon styling */
+.timesheet-help-icon {
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.timesheet-help-icon:hover {
+  color: #1890ff;
+}
+
+/* Required field indicator */
+.timesheet-required {
+  color: #ff4d4f;
+  margin-right: 4px;
+  font-weight: bold;
+}
+
+/* Hours input in tables */
+.timesheet-hours-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timesheet-hours-input-container .ant-input-number {
+  width: 90px !important;
+}
+
+.timesheet-hours-label {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+}
+
+.timesheet-header-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.timesheet-header-subtitle {
+  margin-top: -8px;
+  margin-left: 32px;
+  font-size: 14px;
+}
+
+/* Enhanced header */
+.timesheet-header-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.timesheet-header-subtitle {
+  margin-top: -8px;
+  margin-left: 32px;
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .timesheet-container {
+    padding: 16px;
+  }
+  
+  .timesheet-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  
+  .timesheet-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .timesheet-success-badge {
+    margin-top: 12px;
+    align-self: flex-start;
+  }
+  
+  .timesheet-form-actions {
+    text-align: center;
+  }
+  
+  .timesheet-available-tasks-section,
+  .timesheet-assigned-tasks-section,
+  .timesheet-misc-tasks-section {
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .timesheet-employee-name {
+    display: block;
+    margin-top: 5px;
+  }
+}
+
+/* Animation */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

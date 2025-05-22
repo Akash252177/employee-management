@@ -1,0 +1,395 @@
+/* ViewEmployeeDetails.css - Modern card-based layout with tabbed interface */
+
+.employee-details-page {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 24px;
+}
+
+/* Header styling */
+.employee-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.employee-back-button {
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.employee-export-button {
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #52c41a;
+  color: white;
+  border-color: #52c41a;
+}
+
+.employee-export-button:focus {
+  background-color: #52c41a;
+  color: white;
+  border-color: #52c41a;
+}
+
+.employee-export-button[disabled] {
+  background-color: #d9d9d9;
+  border-color: #d9d9d9;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+/* Profile summary card */
+.employee-profile-summary {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+  background: linear-gradient(to right, #f9f9f9, #ffffff);
+}
+
+.profile-summary-content {
+  display: flex;
+  padding: 24px;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profile-avatar-container {
+  width: 120px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 24px;
+}
+
+.profile-avatar {
+  border: 4px solid white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.profile-details {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-name-role {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-name {
+  margin: 0 !important;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.profile-status-badge {
+  font-weight: 500;
+  margin-left: 12px;
+  background-color: #f5f5f5;
+  padding: 4px 10px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+}
+
+.profile-role-id {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profile-role-tag {
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: capitalize;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-id {
+  color: #6b7280;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-contact-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.profile-quick-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.quick-item-icon {
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.quick-item-text {
+  color: #1f2937;
+  font-size: 14px;
+}
+
+a.quick-item-text {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+/* Tabs styling */
+.employee-tabs-container {
+  margin-top: 24px;
+}
+
+.employee-tabs {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.tab-title {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+/* Info cards */
+.info-card {
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.info-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.info-card-content {
+  padding: 8px 0;
+  max-height: none;
+}
+
+.info-item {
+  display: flex;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item-icon {
+  color: #1890ff;
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.info-item-content {
+  flex: 1;
+}
+
+.info-item-label {
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.info-item-value {
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 500;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* Avatar upload styling */
+.avatar-uploader .ant-upload-select {
+  margin: 0 auto;
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.avatar-uploader .ant-upload-list-picture-circle .ant-upload-list-item {
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.ant-upload-select-picture-card > .ant-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Image preview modal */
+.ant-image-preview-mask,
+.ant-image-preview-wrap {
+  z-index: 1050;
+}
+
+/* Show only one image at a time in upload list */
+.avatar-uploader .ant-upload-list-item:not(:last-child) {
+  display: none;
+}
+
+/* Keep upload button only showing when no files */
+.avatar-uploader .ant-upload.ant-upload-select {
+  display: block;
+}
+
+/* Position preview icon */
+.avatar-uploader .ant-upload-list-item-actions .anticon-eye {
+  color: white;
+  font-size: 16px;
+}
+
+/* Clean up modal spacing */
+.ant-modal-body {
+  padding: 24px;
+}
+
+/* Form items */
+.info-card .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.info-card .ant-form-item-label > label {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.info-card .ant-input,
+.info-card .ant-select-selector,
+.info-card .ant-picker {
+  border-radius: 8px;
+}
+
+.info-card .ant-input-textarea {
+  border-radius: 8px;
+}
+
+.edit-buttons-container {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .employee-details-page {
+    padding: 16px;
+  }
+  
+  .profile-summary-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .profile-name-role {
+    align-items: center;
+  }
+  
+  .profile-contact-quick {
+    justify-content: center;
+  }
+  
+  .profile-quick-item {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .task-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .task-dates {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .employee-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .employee-header-right {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .employee-export-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .tab-title {
+    font-size: 13px;
+  }
+  
+  .employee-tabs .ant-tabs-tab {
+    padding: 8px 12px;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .info-item-content {
+    width: 100%;
+  }
+  
+  .info-item-value {
+    font-size: 14px;
+  }
+}

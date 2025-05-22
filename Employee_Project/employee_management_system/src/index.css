@@ -1,0 +1,25 @@
+/* Fix for blinking dropdowns */
+.ant-select-dropdown {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* Fix for all other Ant Design dropdowns and popups */
+.ant-dropdown, 
+.ant-picker-dropdown, 
+.ant-cascader-dropdown,
+.ant-tooltip, 
+.ant-popover, 
+.ant-modal-mask, 
+.ant-modal-wrap {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Fix for animations in select components */
+.ant-select-selection-item-remove,
+.ant-select-clear {
+  transition: none !important;
+} 

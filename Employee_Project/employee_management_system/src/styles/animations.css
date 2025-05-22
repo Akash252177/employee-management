@@ -1,0 +1,140 @@
+.fade-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-in-out, transform 300ms ease-out;
+}
+
+.fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 300ms ease-in-out, transform 300ms ease-out;
+}
+
+/* Staff card animations */
+.staff-card {
+  transform-origin: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.staff-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* List item animations */
+.staff-list-item {
+  transform-origin: left;
+  transition: all 0.2s ease;
+}
+
+.staff-list-item:hover {
+  background-color: rgba(24, 144, 255, 0.05);
+}
+
+/* Dropdown menu animations */
+.staff-dropdown-menu {
+  animation: dropdownFadeIn 0.2s ease;
+  transform-origin: top right;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Button hover animations */
+.staff-action-icon, .staff-actions-button {
+  transition: all 0.2s ease;
+}
+
+.staff-action-icon:hover, .staff-actions-button:hover {
+  transform: scale(1.1);
+  color: #1890ff;
+}
+
+/* Delete button animation */
+.staff-delete-icon:hover {
+  color: #ff4d4f !important;
+}
+
+/* Card selection animation */
+.staff-card-selected {
+  animation: pulseSelection 1s ease;
+  border-color: #1890ff;
+}
+
+@keyframes pulseSelection {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+  }
+}
+
+/* Content loading fade-in */
+.staff-content {
+  animation: contentFadeIn 0.5s ease;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Message animations */
+.success-message-animation {
+  animation: slideInUp 0.3s ease;
+}
+
+.error-message-animation {
+  animation: shakeError 0.5s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shakeError {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
